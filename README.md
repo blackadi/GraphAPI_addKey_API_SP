@@ -94,16 +94,16 @@ namespace SampleCertCall
         static void Main(string[] args)
         {
             // Configure the following
-            string pfxFilePath = "cert which is uploaded to azure\\uploadedCert.pfx";
-            string password = "Test@123";
-            string objectId = "2126b082-180a-4525-8300-ea6465769c41"; // use {CLIENT_ID} for creating client_assertion and use {ObjectID} for PoP token creation
+            string pfxFilePath = "<Path to your certificate file>";
+            string password = "<Certificate password>";
+            string objectId = "<id of the application or servicePrincipal object>"; // use {CLIENT_ID} for creating client_assertion and use {ObjectID} for PoP token creation
             Guid guid = Guid.NewGuid();
 
             // Get signing certificate
             X509Certificate2 signingCert = new X509Certificate2(pfxFilePath, password);
 
             // audience
-            // string aud = "https://login.microsoftonline.com/0213c7bf-21e1-4cb4-8529-e4eaff767ca4/v2.0"; // uncomment this for {client_assertion}
+            // string aud = "https://login.microsoftonline.com/{tenantId}/v2.0"; // uncomment this for {client_assertion}
             string aud = $"00000002-0000-0000-c000-000000000000"; // uncomment for proof of possession token
 
             // aud and iss are the only required claims.
