@@ -2,7 +2,7 @@
 
 > :warning: **THIS GUIDE SAMPLE IS PROVIDED _"AS IS"_ WITHOUT WARRANTY OF ANY KIND**.
 > This sample is not supported under any Microsoft standard support program or service. The code sample is provided AS IS without warranty of any kind.
-> :exclamation: **_JUST a Personal Effort!_**.
+> :wink: **_JUST a Personal Effort_**.
 
 ## This tutorial will demonstrate how to add certificate to your application via Graph API
 
