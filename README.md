@@ -24,7 +24,7 @@ Using the C# code to fetch certficate info to be used with "_[keyCredentials](ht
 }
 ```
 
-![Package Structure](images\UpdateSP.PNG)
+![Package Structure](images/UpdateSP.PNG)
 
 ### 1. [Create a self-signed public certificate to authenticate your application](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
 
@@ -151,11 +151,11 @@ Make sure the values for your own tenant is added as shown in the screenhost.
 
 - to get the correct client assertion, uncomment everything from the code were it say for creating client_assertion.
 
-  ![Package Structure](images\Generate_client_assertion.PNG)
+  ![Package Structure](images/Generate_client_assertion.PNG)
 
-  ![Package Structure](images\Generate_client_assertion_result.PNG)
+  ![Package Structure](images/Generate_client_assertion_result.PNG)
 
-  ![Package Structure](images\AccessTokenRequestwithCertificate.PNG)
+  ![Package Structure](images/AccessTokenRequestwithCertificate.PNG)
 
 - Generate PoP (proof of possession)
 
@@ -163,9 +163,9 @@ Make sure the values for your own tenant is added as shown in the screenhost.
 
   Get new certificate info from the code, then to old certificate to get PoP from it.
 
-  ![Package Structure](images\GetNewCertInfo.PNG)
+  ![Package Structure](images/GetNewCertInfo.PNG)
 
-  ![Package Structure](images\GetNewCertInfo2.PNG)
+  ![Package Structure](images/GetNewCertInfo2.PNG)
 
   ```json
   {
@@ -186,9 +186,9 @@ Make sure the values for your own tenant is added as shown in the screenhost.
 - Now we will call addKey API using **`Postman`**
 
   Using the `C#` code we will generate the PoP token based on the valid certificate uploaded to our azure SP previously and use it to add the new certificate.
-  ![Package Structure](images\GetPoP1.PNG)
+  ![Package Structure](images/GetPoP1.PNG)
 
-  ![Package Structure](images\GetPoP2.PNG)
+  ![Package Structure](images/GetPoP2.PNG)
 
   ```json
   {
@@ -206,7 +206,7 @@ Make sure the values for your own tenant is added as shown in the screenhost.
 
   After calling the API, the new certificate will uploaded.
 
-  ![Package Structure](images\NewCertUploaded.PNG)
+  ![Package Structure](images/NewCertUploaded.PNG)
 
   Making a GET call to https://graph.microsoft.com/v1.0/servicePrincipals/2126b082-180a-4525-8300-ea6465769c41 we can see the result containing the new certficate and it's password.
-  ![Package Structure](images\NewCertUploaded2.PNG)
+  ![Package Structure](images/NewCertUploaded2.PNG)
