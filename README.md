@@ -1,4 +1,4 @@
-# Sample Code To Add New Certificate via Graph API
+# Sample Guide Explaning How Adds [servicePrincipal:addKey](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addkey?view=graph-rest-1.0&tabs=http) API works.
 
 > :warning: **THIS GUIDE SAMPLE IS PROVIDED _"AS IS"_ WITHOUT WARRANTY OF ANY KIND**.
 > This sample is not supported under any Microsoft standard support program or service. The code sample is provided AS IS without warranty of any kind **_Personal Effort_**.
