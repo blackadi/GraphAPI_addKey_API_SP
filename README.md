@@ -148,9 +148,9 @@ namespace SampleCertCall
 }
 ```
 
-Make sure the values for your own tenant is added as shown in the screenhost.
+Make sure to change the values to match to your configurations, see below screenhost.
 
-- to get the correct client assertion, uncomment everything from the code were it say for creating client_assertion.
+- To get the correct client assertion, uncomment everything from the code where it says for creating client assertion.
 
   ![Package Structure](images/Generate_client_assertion.PNG)
 
@@ -158,11 +158,13 @@ Make sure the values for your own tenant is added as shown in the screenhost.
 
   ![Package Structure](images/AccessTokenRequestwithCertificate.PNG)
 
-- Generate PoP (proof of possession)
+  The Access token request with a certificate is returned.
+
+- Generating proof of possession tokens for rolling keys.
 
   > :information_source: Authentication_MissingOrMalformed error will be returned if PoP is not signed with the already uploaded certificate.
 
-  Get new certificate info from the code, then to old certificate to get PoP from it.
+  Using the sample code we can extract the certificate info which we want to add, as follow:
 
   ![Package Structure](images/GetNewCertInfo.PNG)
 
@@ -182,11 +184,11 @@ Make sure the values for your own tenant is added as shown in the screenhost.
   }
   ```
 
-### 3. Now we can use that access token to add our new certificate via Graph API to either the [application](https://docs.microsoft.com/en-us/graph/api/application-addkey?view=graph-rest-1.0&tabs=http) or [servicePrincipal](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addkey?view=graph-rest-1.0&tabs=http).
+### 3. To add the new certificate via Graph API, we need to generate proof of possession tokens.
 
-- Now we will call addKey API using **`Postman`**
+- Based on MS [doc](https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken):
 
-  Using the `C#` code we will generate the PoP token based on the valid certificate uploaded to our azure SP previously and use it to add the new certificate.
+  From the `C#` the following options will be enabled.
   ![Package Structure](images/GetPoP1.PNG)
 
   ![Package Structure](images/GetPoP2.PNG)
@@ -205,9 +207,12 @@ Make sure the values for your own tenant is added as shown in the screenhost.
   }
   ```
 
-  After calling the API, the new certificate will uploaded.
+  Now, let's add the PoP token in the request body and the previously generated access token in the header.
 
   ![Package Structure](images/NewCertUploaded.PNG)
 
-  Making a GET call to https://graph.microsoft.com/v1.0/servicePrincipals/2126b082-180a-4525-8300-ea6465769c41 we can see the result containing the new certficate and it's password.
+  As shown in the above screen the certificate has been added successfully.
+
+  To check the newly added certificate, we can do a `GET` request for `https://graph.microsoft.com/v1.0/servicePrincipals/2126b082-180a-4525-8300-ea6465769c41`.
+
   ![Package Structure](images/NewCertUploaded2.PNG)
