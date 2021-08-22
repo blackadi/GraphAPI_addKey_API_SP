@@ -76,7 +76,7 @@ Using the C# code to fetch certficate info to be used with "_[keyCredentials](ht
 
   For this demo [this modified sample C# code](https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken) will be used to generate this.
 
-> **:information_source: You can `clone` the sample code or `Copy/Past` the code below on your own**
+> **:information_source: You can `clone` the sample code or `Copy/Past` the code below.**
 
 `git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git`
 
