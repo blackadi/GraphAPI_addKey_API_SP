@@ -45,19 +45,19 @@ Using the C# code to fetch certficate info to be used with "_[keyCredentials](ht
 
 - [Option 2](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-2-create-and-export-your-public-certificate-with-its-private-key): Create and export your public certificate with its private key
 
-  ```ssh
+  ```powershell
   $cert = New-SelfSignedCertificate -Subject "CN={certificateName}" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
   ```
 
-  ```ssh
+  ```powershell
   Export-Certificate -Cert $cert -FilePath "C:\Users\admin\Desktop\{certificateName}.cer"   ## Specify your preferred location and replace {certificateName}
   ```
 
-  ```ssh
+  ```powershell
   $mypwd = ConvertTo-SecureString -String "{myPassword}" -Force -AsPlainText  ## Replace {myPassword}
   ```
 
-  ```ssh
+  ```powershell
   Export-PfxCertificate -Cert $cert -FilePath "C:\Users\admin\Desktop\{privateKeyName}.pfx" -Password $mypwd   ## Specify your preferred location and replace {privateKeyName}
   ```
 
@@ -76,110 +76,110 @@ Using the C# code to fetch certficate info to be used with "_[keyCredentials](ht
 
   For this demo [this modified sample C# code](https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken) will be used to generate this.
 
-  You can **clone** the modified sample code or **copy/past** the code below on your own
+> **:information_source: You can \*\*\_clone**\* the sample code or **\_Copy/Past\*\*\* the code below on your own**
 
-  `git clone `
+`git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git`
 
-  ```csharp
-  using System;
-  using System.Collections.Generic;
-  using System.Security.Cryptography.X509Certificates;
-  using Microsoft.IdentityModel.Tokens;
-  using Microsoft.IdentityModel.JsonWebTokens;
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.JsonWebTokens;
 
-  namespace SampleCertCall
+namespace SampleCertCall
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Configure the following
+            string pfxFilePath = "cert which is uploaded to azure\\uploadedCert.pfx";
+            string password = "Test@123";
+            string objectId = "2126b082-180a-4525-8300-ea6465769c41"; // use {CLIENT_ID} for creating client_assertion and use {ObjectID} for PoP token creation
+            Guid guid = Guid.NewGuid();
+
+            // Get signing certificate
+            X509Certificate2 signingCert = new X509Certificate2(pfxFilePath, password);
+
+            // audience
+            // string aud = "https://login.microsoftonline.com/0213c7bf-21e1-4cb4-8529-e4eaff767ca4/v2.0"; // uncomment this for {client_assertion}
+            string aud = $"00000002-0000-0000-c000-000000000000"; // uncomment for proof of possession token
+
+            // aud and iss are the only required claims.
+            var claims = new Dictionary<string, object>()
+            {
+                { "aud", aud },
+                { "iss", objectId }
+                // { "sub", objectId }, // uncomment this when creating {client_assertion}
+                // { "jti", guid} // uncomment this when creating {client_assertion}
+            };
+
+            // token validity should not be more than 10 minutes
+            var now = DateTime.UtcNow;
+            var securityTokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            {
+                Claims = claims,
+                NotBefore = now,
+                Expires = now.AddMinutes(10),
+                SigningCredentials = new X509SigningCredentials(signingCert)
+            };
+
+            var handler = new JsonWebTokenHandler();
+            var x = handler.CreateToken(securityTokenDescriptor);
+            Console.WriteLine($"client_assertion: {x}");
+            Console.WriteLine("=================================================================================\n");
+            Console.WriteLine("certificate Info to be used in request body {keyCredential resource type}\n");
+            Console.WriteLine("=================================================================================\n");
+            Console.WriteLine($"customKeyIdentifier (Thumbprint):  {signingCert.Thumbprint}"); // or signingCert.GetCertHashString()
+            Console.WriteLine("----------------------------------------------------------------");
+            Console.WriteLine($"key: {Convert.ToBase64String(signingCert.GetRawCertData())}");
+            Console.WriteLine("----------------------------------------------------------------");
+            Console.WriteLine($"displayName: {signingCert.GetName()}");
+            Console.WriteLine("----------------------------------------------------------------");
+            Console.WriteLine($"startDateTime: {Convert.ToDateTime(signingCert.GetEffectiveDateString()).ToString("yyyy-MM-ddTHH:mm:ssZ")}");
+            Console.WriteLine("----------------------------------------------------------------");
+            Console.WriteLine($"endDateTime: {Convert.ToDateTime(signingCert.GetExpirationDateString()).ToString("yyyy-MM-ddTHH:mm:ssZ")}");
+            Console.WriteLine("----------------------------------------------------------------");
+            Console.WriteLine($"keyId: {Guid.NewGuid()}");
+        }
+    }
+}
+```
+
+Make sure the values for your own tenant is added as shown in the screenhost.
+
+- to get the correct client assertion, uncomment everything from the code were it say for creating client_assertion.
+
+  ![Package Structure](images\Generate_client_assertion.PNG)
+
+  ![Package Structure](images\Generate_client_assertion_result.PNG)
+
+  ![Package Structure](images\AccessTokenRequestwithCertificate.PNG)
+
+- Generate PoP (proof of possession)
+
+  > :information_source: Authentication_MissingOrMalformed error will be returned if PoP is not signed with the already uploaded certificate.
+
+  Get new certificate info from the code, then to old certificate to get PoP from it.
+
+  ![Package Structure](images\GetNewCertInfo.PNG)
+
+  ![Package Structure](images\GetNewCertInfo2.PNG)
+
+  ```json
   {
-      class Program
-      {
-          static void Main(string[] args)
-          {
-              // Configure the following
-              string pfxFilePath = "cert which is uploaded to azure\\uploadedCert.pfx";
-              string password = "Test@123";
-              string objectId = "2126b082-180a-4525-8300-ea6465769c41"; // use {CLIENT_ID} for creating client_assertion and use {ObjectID} for PoP token creation
-              Guid guid = Guid.NewGuid();
-
-              // Get signing certificate
-              X509Certificate2 signingCert = new X509Certificate2(pfxFilePath, password);
-
-              // audience
-              // string aud = "https://login.microsoftonline.com/0213c7bf-21e1-4cb4-8529-e4eaff767ca4/v2.0"; // uncomment this for {client_assertion}
-              string aud = $"00000002-0000-0000-c000-000000000000"; // uncomment for proof of possession token
-
-              // aud and iss are the only required claims.
-              var claims = new Dictionary<string, object>()
-              {
-                  { "aud", aud },
-                  { "iss", objectId }
-                  // { "sub", objectId }, // uncomment this when creating {client_assertion}
-                  // { "jti", guid} // uncomment this when creating {client_assertion}
-              };
-
-              // token validity should not be more than 10 minutes
-              var now = DateTime.UtcNow;
-              var securityTokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
-              {
-                  Claims = claims,
-                  NotBefore = now,
-                  Expires = now.AddMinutes(10),
-                  SigningCredentials = new X509SigningCredentials(signingCert)
-              };
-
-              var handler = new JsonWebTokenHandler();
-              var x = handler.CreateToken(securityTokenDescriptor);
-              Console.WriteLine($"client_assertion: {x}");
-              Console.WriteLine("=================================================================================\n");
-              Console.WriteLine("certificate Info to be used in request body {keyCredential resource type}\n");
-              Console.WriteLine("=================================================================================\n");
-              Console.WriteLine($"customKeyIdentifier (Thumbprint):  {signingCert.Thumbprint}"); // or signingCert.GetCertHashString()
-              Console.WriteLine("----------------------------------------------------------------");
-              Console.WriteLine($"key: {Convert.ToBase64String(signingCert.GetRawCertData())}");
-              Console.WriteLine("----------------------------------------------------------------");
-              Console.WriteLine($"displayName: {signingCert.GetName()}");
-              Console.WriteLine("----------------------------------------------------------------");
-              Console.WriteLine($"startDateTime: {Convert.ToDateTime(signingCert.GetEffectiveDateString()).ToString("yyyy-MM-ddTHH:mm:ssZ")}");
-              Console.WriteLine("----------------------------------------------------------------");
-              Console.WriteLine($"endDateTime: {Convert.ToDateTime(signingCert.GetExpirationDateString()).ToString("yyyy-MM-ddTHH:mm:ssZ")}");
-              Console.WriteLine("----------------------------------------------------------------");
-              Console.WriteLine($"keyId: {Guid.NewGuid()}");
-          }
-      }
+    "keyCredential": {
+      "type": "X509CertAndPassword",
+      "usage": "Sign",
+      "key": "MIIDFjCCAf6gAwIBAgIQFk6OV+DB1pxCJQxk0bH6uTANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBN1cGxvYWROZXdDZXJ0LmxvY2FsMB4XDTIxMDgyMjExMDMyMVoXDTIyMDgyMjExMjMyMVowHjEcMBoGA1UEAwwTdXBsb2FkTmV3Q2VydC5sb2NhbDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOaYXVefPQIGko9aklP6YnklMV3Km+90D7Ikp6tk8/aQNptXSNf5dFJpmgWD8qbo5lLxHLpeO+HmnirKvwPCErCr6gHkmBwie7iP3qgh0xLsfGdpePaSwA7vaBOZlsOoadqXj+Rwlmktc7/J2MKC2HcEMN0OAUJyTO5YmYtkGi7ETnBxKWpTSmbL3M1EY4Gu+so0NXru5SO0cR3lJk49uX7ixIQBPNK1llnopncrMaTaD8pDYgZSWA0sEcCz9u8EsCx8rJmNDGOa7GfM7/fCAIWQWAvMb4BKPOh6gBBR+i1D1Lr3uVsNQ9pqqhpd6+z73jKUbCExcgp/iLLXFBSsxxECAwEAAaNQME4wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAdBgNVHQ4EFgQUswUzw+7dO/95M0wg0at5/eHo6pgwDQYJKoZIhvcNAQELBQADggEBAG1x0VG6UPF0lLuZgUMCgmLMGh5iHXmqNA2DkHfhbKd+JFUowSA/Vd2NdN7zByNEWCpsNsiEgnzMen9zM53cuA9sQXmG2TxYFUYQ3fuFXpqrRvBqxP0UpeSZG6rZvr/nihoUfIY8JWC/iNIBoUbMjfUay2BDmCzRbLIKrmhuaHpIxHxSnHs1EUYcDejk7pzmdPPazrcKatmn1LK0o5o3kHXdKxoiYDoH9SVqhiQPx7Ge9oa9TebN9NzXHso3GIYd36YtlD12KRBF7wKbSl7X6oK1ka3WLCCdmMf76gU76ZFuEtgWPkzEckfH8fep0UqtLyPbCXkQv9KXhzkNVyx0poA="
+    },
+    "passwordCredential": {
+      "secretText": "Test@123"
+    },
+    "proof": "To_BE_ADD_IN_NEXT_STEP"
   }
   ```
-
-  Make sure the values for your own tenant is added as shown in the screenhost.
-
-  - to get the correct client assertion, uncomment everything from the code were it say for creating client_assertion.
-
-    ![Package Structure](images\Generate_client_assertion.PNG)
-
-    ![Package Structure](images\Generate_client_assertion_result.PNG)
-
-    ![Package Structure](images\AccessTokenRequestwithCertificate.PNG)
-
-  - Generate PoP (proof of possession)
-
-    > :information_source: Authentication_MissingOrMalformed error will be returned if PoP is not signed with the already uploaded certificate.
-
-    Get new certificate info from the code, then to old certificate to get PoP from it.
-
-    ![Package Structure](images\GetNewCertInfo.PNG)
-
-    ![Package Structure](images\GetNewCertInfo2.PNG)
-
-    ```json
-    {
-      "keyCredential": {
-        "type": "X509CertAndPassword",
-        "usage": "Sign",
-        "key": "MIIDFjCCAf6gAwIBAgIQFk6OV+DB1pxCJQxk0bH6uTANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBN1cGxvYWROZXdDZXJ0LmxvY2FsMB4XDTIxMDgyMjExMDMyMVoXDTIyMDgyMjExMjMyMVowHjEcMBoGA1UEAwwTdXBsb2FkTmV3Q2VydC5sb2NhbDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOaYXVefPQIGko9aklP6YnklMV3Km+90D7Ikp6tk8/aQNptXSNf5dFJpmgWD8qbo5lLxHLpeO+HmnirKvwPCErCr6gHkmBwie7iP3qgh0xLsfGdpePaSwA7vaBOZlsOoadqXj+Rwlmktc7/J2MKC2HcEMN0OAUJyTO5YmYtkGi7ETnBxKWpTSmbL3M1EY4Gu+so0NXru5SO0cR3lJk49uX7ixIQBPNK1llnopncrMaTaD8pDYgZSWA0sEcCz9u8EsCx8rJmNDGOa7GfM7/fCAIWQWAvMb4BKPOh6gBBR+i1D1Lr3uVsNQ9pqqhpd6+z73jKUbCExcgp/iLLXFBSsxxECAwEAAaNQME4wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAdBgNVHQ4EFgQUswUzw+7dO/95M0wg0at5/eHo6pgwDQYJKoZIhvcNAQELBQADggEBAG1x0VG6UPF0lLuZgUMCgmLMGh5iHXmqNA2DkHfhbKd+JFUowSA/Vd2NdN7zByNEWCpsNsiEgnzMen9zM53cuA9sQXmG2TxYFUYQ3fuFXpqrRvBqxP0UpeSZG6rZvr/nihoUfIY8JWC/iNIBoUbMjfUay2BDmCzRbLIKrmhuaHpIxHxSnHs1EUYcDejk7pzmdPPazrcKatmn1LK0o5o3kHXdKxoiYDoH9SVqhiQPx7Ge9oa9TebN9NzXHso3GIYd36YtlD12KRBF7wKbSl7X6oK1ka3WLCCdmMf76gU76ZFuEtgWPkzEckfH8fep0UqtLyPbCXkQv9KXhzkNVyx0poA="
-      },
-      "passwordCredential": {
-        "secretText": "Test@123"
-      },
-      "proof": "To_BE_ADD_IN_NEXT_STEP"
-    }
-    ```
 
 ### 3. Now we can use that access token to add our new certificate via Graph API to either the [application](https://docs.microsoft.com/en-us/graph/api/application-addkey?view=graph-rest-1.0&tabs=http) or [servicePrincipal](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addkey?view=graph-rest-1.0&tabs=http).
 
