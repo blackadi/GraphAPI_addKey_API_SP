@@ -33,11 +33,11 @@ Using the C# code to fetch certficate info to be used with "_[keyCredentials](ht
 
 - [Option 1](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-1--create-and-export-your-public-certificate-without-a-private-key): Create and export your public certificate without a private key
 
-  ```ssh
+  ```powershell
   $cert = New-SelfSignedCertificate -Subject "CN={certificateName}" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
   ```
 
-  ```ssh
+  ```ps
   Export-Certificate -Cert $cert -FilePath "C:\Users\admin\Desktop\{certificateName}.cer"   ## Specify your preferred location and replace {certificateName}
   ```
 
