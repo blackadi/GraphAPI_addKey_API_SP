@@ -28,8 +28,8 @@ Using the C# code to fetch certficate info to be used with "_[keyCredentials](ht
 
 ### 1. [Create a self-signed public certificate to authenticate your application](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
 
-    > :exclamation: **Caution**
-    > Using a self-signed certificate is only recommended for development, not production.
+> :exclamation: **Caution**
+> Using a self-signed certificate is only recommended for development, not production.
 
 - [Option 1](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-1--create-and-export-your-public-certificate-without-a-private-key): Create and export your public certificate without a private key
 
