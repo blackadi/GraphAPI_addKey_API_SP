@@ -4,13 +4,13 @@
 > This sample is not supported under any Microsoft standard support program or service. The code sample is provided AS IS without warranty of any kind.
 > :wink: **_JUST a Personal Effort_**.
 
-## This tutorial will demonstrate how to add certificate to your application via Graph API
+## This tutorial will demonstrate how to add certificate to your service principal via Graph API
 
-> :exclamation: [**Before you can call addKey API any existing valid certificates must be uploaded**](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials#register-your-certificate-with-microsoft-identity-platform), Applications OR servicePrincipal that don’t have any existing valid certificates (no certificates have been added yet, or all certificates have expired), won’t be able to use this service action. You can use the Update application operation to perform an update instead. need to have exisiting cert follow below.
+> :exclamation: [**Before you can sent request to addKey API an existing valid certificates must be uploaded first**](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials#register-your-certificate-with-microsoft-identity-platform), service principal that don’t have any existing valid certificates (no certificates have been added yet, or all certificates have expired), won’t be able to use this service action. You can use the Update application operation to perform an update instead. need to have exisiting cert follow below.
 
-For this tutorial, I will do a `PATCH` request to upload my test certificate to one of my test servicePrincipal, but feel free to use anythose method to update your SP.
+For this tutorial, a [`PATCH`](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update?view=graph-rest-1.0&tabs=http) request will be used to upload a test certificate to the servicePrincipal, so we can used it later to generate accessToken (_OR use your preferred method instead_).
 
-Using the C# code to fetch certficate info to be used with "_[keyCredentials](https://docs.microsoft.com/en-us/graph/api/resources/keycredential?view=graph-rest-1.0)_" Propertyi n the request body.
+The request body of the Certficate is of type "_[keyCredentials](https://docs.microsoft.com/en-us/graph/api/resources/keycredential?view=graph-rest-1.0)_".
 
 ```json
 {
@@ -27,7 +27,7 @@ Using the C# code to fetch certficate info to be used with "_[keyCredentials](ht
 
 ![Package Structure](images/UpdateSP.PNG)
 
-### 1. [Create a self-signed public certificate to authenticate your application](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
+### 1. [Create a new self-signed public certificate to authenticate your application](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
 
 > :exclamation: **Caution**
 > Using a self-signed certificate is only recommended for development, not production.
@@ -75,7 +75,7 @@ Using the C# code to fetch certficate info to be used with "_[keyCredentials](ht
 
   To compute the assertion, you can use one of the many JWT libraries in the language of your choice - [MSAL supports this using .WithCertificate()](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-client-assertions). The information is carried by the token in its Header, Claims, and Signature.
 
-  For this demo [this modified sample C# code](https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken) will be used to generate this.
+  For this demo [the below modified sample C# code](https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken) will be used to generate it.
 
 > **:information_source: You can `clone` the sample code or `Copy/Past` the code below.**
 
