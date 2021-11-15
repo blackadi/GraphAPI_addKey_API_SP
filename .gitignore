@@ -389,3 +389,6 @@ FodyWeavers.xsd
 
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
+
+# Backup ReadME vesion ends with .old
+*.old

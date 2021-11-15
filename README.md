@@ -1,33 +1,18 @@
-# Sample Guide Explaning How Adds [servicePrincipal:addKey](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addkey?view=graph-rest-1.0&tabs=http) API works.
+# MS Graph API: Add/Renew key cerdentional (certificate) _API [servicePrincipal:addKey](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addkey?view=graph-rest-1.0&tabs=http)_.
 
-> :warning: **THIS GUIDE SAMPLE IS PROVIDED _"AS IS"_ WITHOUT WARRANTY OF ANY KIND**.
-> This sample is not supported under any Microsoft standard support program or service. The code sample is provided AS IS without warranty of any kind.
-> :wink: **_JUST a Personal Effort_**.
+By using this API, we can add a new certficate to any servicePrincipal. The idea is to automate rolling servicePrincipal expiring keys via [addKey](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addkey?view=graph-rest-1.0&tabs=http) or [removeKey](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-removekey?view=graph-rest-1.0&tabs=http).
 
-## This tutorial will demonstrate how to add certificate to your service principal via Graph API
+## Add a certificate to an existing servicePrincipal
 
-> :exclamation: [**Before you can sent request to addKey API an existing valid certificates must be uploaded first**](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials#register-your-certificate-with-microsoft-identity-platform), service principal that don’t have any existing valid certificates (no certificates have been added yet, or all certificates have expired), won’t be able to use this service action. You can use the Update application operation to perform an update instead. need to have exisiting cert follow below.
+> **:danger: ServicePrincipals that don’t have any existing valid certificates (i.e.: no certificates have been added yet, or all certificates have expired), won’t be able to use this service action. [Update servicePrincipal](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update?view=graph-rest-1.0&tabs=http) can be used to perform an update instead.**
 
-For this tutorial, a [`PATCH`](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update?view=graph-rest-1.0&tabs=http) request will be used to upload a test certificate to the servicePrincipal, so we can used it later to generate accessToken (_OR use your preferred method instead_).
+### Prerequisite
+- Valid certificate. (_For the sake of this example, we will use a self-signed certificate_)
+- Consent to the needed [permissions](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addkey?view=graph-rest-1.0&tabs=http#permissions).
+- [Registered application](https://docs.microsoft.com/en-us/graph/auth-register-app-v2).
+- Rest API Client tool.   
 
-The request body of the Certficate is of type "_[keyCredentials](https://docs.microsoft.com/en-us/graph/api/resources/keycredential?view=graph-rest-1.0)_".
-
-```json
-{
-  "keyCredentials": [
-    {
-      "key": "MIIDFDCCAfygAwIBAgIQIONixStLEqNCfOY/Hl1VcTANBgkqhkiG9w0BAQsFADAdMRswGQYDVQQDDBJ1cGxvYWRlZFRlc3QubG9jYWwwHhcNMjEwODIyMTEwMDMxWhcNMjIwODIyMTEyMDMxWjAdMRswGQYDVQQDDBJ1cGxvYWRlZFRlc3QubG9jYWwwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDuIEybadSNjJtghmk8LskRfR7aLg1Ld1WxB8aUQoWfq4YcRvedThATS4lyTa4Eh2pXnWSdO3idua9PlfCwIboEzKFz53oqlEylPB3YIxKtl1bPtH8hwonwD8Il5obNsHoHs1N1EThrsjBmTxTY5nO2kozwfmEvR60YX305rPhLeRlO5ikMZEsY1ybGQOKOr+g/OuNw52Q54H5ZvJgbcnVNNsb1AQvHESpvZkNiU9Z8svSN4G4E9kJIRgivuts6lLEUsl9r6SAcm33yIEMLi6xTHJNUZZAE9JOjugbdeSi0mPgnBB6+l1FKfx3kwnShgLgJ9wf9GLe5x00vEJIOPeo9AgMBAAGjUDBOMA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwHQYDVR0OBBYEFGpgjxVGK2BQutJIQJVnbKlMZhshMA0GCSqGSIb3DQEBCwUAA4IBAQDhagw9f9rfRizSkfxec+sGP+W4jj89jz0YRlDHV+fa906yl9MaUbmPuzb33lPaf/n5FcNHGBkB71FFUAEy3pqMWHdyt/0lWRAfXWcOatEGx0T++qZabyiga7cwGCkYgeQnnEIwMsDd+G7BzmRdMqUULnZkbxKvhZrQp9ljKt/cRn2vdfTSAMxptzJ6ZIfQ/tukebKcvE6x8XocxTQ7eH1r0qFnhUl5+yHAVTh1MoaOBPLy7dCrvSdG+PjXpVROjQQFre4gNNHDjLSsXi2h6rPUTRHLjpu2xvzQaJweg6t0/AqET5WXUY6uWStKMa+7XR3Jv9VxqGn55cAGTSrORp+E",
-      "keyId": "89357730-3f4f-49d6-90d2-c479bf925702",
-      "type": "AsymmetricX509Cert",
-      "usage": "Verify"
-    }
-  ]
-}
-```
-
-![Package Structure](images/UpdateSP.PNG)
-
-### 1. [Create a new self-signed public certificate to authenticate your application](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
+### [Create a new self-signed public certificate to authenticate your application](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate)
 
 > :exclamation: **Caution**
 > Using a self-signed certificate is only recommended for development, not production.
@@ -62,24 +47,17 @@ The request body of the Certficate is of type "_[keyCredentials](https://docs.mi
   Export-PfxCertificate -Cert $cert -FilePath "C:\Users\admin\Desktop\{privateKeyName}.pfx" -Password $mypwd   ## Specify your preferred location and replace {privateKeyName}
   ```
 
-  Your certificate (.cer file) is now ready to upload to the Azure portal. You also have a private key (.pfx file) that is encrypted and can't be read by other parties. Once uploaded, retrieve the certificate thumbprint for use to authenticate your application.
+To enable certificate credentials instead of client secret for authentication, we need to generate a JSON Web Token (JWT) assertion signed with a certificate that the application/servicePrincipal owns.
 
-### 2. [Use the portal to create an Azure AD application and service principal that can access resources](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal)
+### [Use JSON Web Token (JWT) assertion signed with a certificate that the application owns](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials)
 
-[`This article`](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#option-1-upload-a-certificate) shows you how to Upload a certificate for authentication with service principals.
-
-### 3. [Use JSON Web Token (JWT) assertion signed with a certificate that the application owns](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials)
-
-- Now we will create a signed jwt token (aka Client Assertion) using **`Postman`**.
-- Then, get an Access Token Using [Client Credentials Grant Flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#second-case-access-token-request-with-a-certificate)
+- We need to create a signed jwt token (aka Client Assertion).
+- Then, get an Access Token Using [Client Credentials Grant Flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#second-case-access-token-request-with-a-certificate).
 
   To compute the assertion, you can use one of the many JWT libraries in the language of your choice - [MSAL supports this using .WithCertificate()](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-client-assertions). The information is carried by the token in its Header, Claims, and Signature.
 
-  For this demo [the below modified sample C# code](https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken) will be used to generate it.
+  Please refer back to [the official code sample](https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken).
 
-> **:information_source: You can `clone` the sample code or `Copy/Past` the code below.**
-
-`git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git`
 
 ```csharp
 using System;
@@ -158,41 +136,50 @@ Make sure to change the values to match to your configurations, see below screen
 
   ![Package Structure](images/AccessTokenRequestwithCertificate.PNG)
 
-  The Access token request with a certificate is returned.
+  Upon a successful HTTP request, the `access_token` will be returned, as shown on the above screenshot.
 
 - Generating proof of possession tokens for rolling keys.
 
   > :information_source: Authentication_MissingOrMalformed error will be returned if PoP is not signed with the already uploaded certificate.
 
-  Using the sample code we can extract the certificate info which we want to add, as follow:
+  **_The provided code in this tutorial can be used to extract certificate info as follow:_**
 
-  ![Package Structure](images/GetNewCertInfo.PNG)
+  - Add your certificate path to `pfxFilePath` variable as follow :
 
-  ![Package Structure](images/GetNewCertInfo2.PNG)
+    ![Package Structure](images/GetNewCertInfo.PNG)
+  
+  - On successful code execution, the below result will be returned:
 
-  ```json
-  {
-    "keyCredential": {
-      "type": "X509CertAndPassword",
-      "usage": "Sign",
-      "key": "MIIDFjCCAf6gAwIBAgIQFk6OV+DB1pxCJQxk0bH6uTANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBN1cGxvYWROZXdDZXJ0LmxvY2FsMB4XDTIxMDgyMjExMDMyMVoXDTIyMDgyMjExMjMyMVowHjEcMBoGA1UEAwwTdXBsb2FkTmV3Q2VydC5sb2NhbDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOaYXVefPQIGko9aklP6YnklMV3Km+90D7Ikp6tk8/aQNptXSNf5dFJpmgWD8qbo5lLxHLpeO+HmnirKvwPCErCr6gHkmBwie7iP3qgh0xLsfGdpePaSwA7vaBOZlsOoadqXj+Rwlmktc7/J2MKC2HcEMN0OAUJyTO5YmYtkGi7ETnBxKWpTSmbL3M1EY4Gu+so0NXru5SO0cR3lJk49uX7ixIQBPNK1llnopncrMaTaD8pDYgZSWA0sEcCz9u8EsCx8rJmNDGOa7GfM7/fCAIWQWAvMb4BKPOh6gBBR+i1D1Lr3uVsNQ9pqqhpd6+z73jKUbCExcgp/iLLXFBSsxxECAwEAAaNQME4wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAdBgNVHQ4EFgQUswUzw+7dO/95M0wg0at5/eHo6pgwDQYJKoZIhvcNAQELBQADggEBAG1x0VG6UPF0lLuZgUMCgmLMGh5iHXmqNA2DkHfhbKd+JFUowSA/Vd2NdN7zByNEWCpsNsiEgnzMen9zM53cuA9sQXmG2TxYFUYQ3fuFXpqrRvBqxP0UpeSZG6rZvr/nihoUfIY8JWC/iNIBoUbMjfUay2BDmCzRbLIKrmhuaHpIxHxSnHs1EUYcDejk7pzmdPPazrcKatmn1LK0o5o3kHXdKxoiYDoH9SVqhiQPx7Ge9oa9TebN9NzXHso3GIYd36YtlD12KRBF7wKbSl7X6oK1ka3WLCCdmMf76gU76ZFuEtgWPkzEckfH8fep0UqtLyPbCXkQv9KXhzkNVyx0poA="
-    },
-    "passwordCredential": {
-      "secretText": "Test@123"
-    },
-    "proof": "To_BE_ADD_IN_NEXT_STEP"
-  }
-  ```
+    ![Package Structure](images/GetNewCertInfo2.PNG)
 
-### 3. To add the new certificate via Graph API, we need to generate proof of possession tokens.
+  - Generate the request body as documented [here](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addkey?view=graph-rest-1.0&tabs=http#request-body)
 
-- Based on MS [doc](https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken):
+    ```json
+    {
+      "keyCredential": {
+        "type": "X509CertAndPassword",
+        "usage": "Sign",
+        "key": "MIIDFjCCAf6gAwIBAgIQFk6OV+DB1pxCJQxk0bH6uTANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBN1cGxvYWROZXdDZXJ0LmxvY2FsMB4XDTIxMDgyMjExMDMyMVoXDTIyMDgyMjExMjMyMVowHjEcMBoGA1UEAwwTdXBsb2FkTmV3Q2VydC5sb2NhbDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOaYXVefPQIGko9aklP6YnklMV3Km+90D7Ikp6tk8/aQNptXSNf5dFJpmgWD8qbo5lLxHLpeO+HmnirKvwPCErCr6gHkmBwie7iP3qgh0xLsfGdpePaSwA7vaBOZlsOoadqXj+Rwlmktc7/J2MKC2HcEMN0OAUJyTO5YmYtkGi7ETnBxKWpTSmbL3M1EY4Gu+so0NXru5SO0cR3lJk49uX7ixIQBPNK1llnopncrMaTaD8pDYgZSWA0sEcCz9u8EsCx8rJmNDGOa7GfM7/fCAIWQWAvMb4BKPOh6gBBR+i1D1Lr3uVsNQ9pqqhpd6+z73jKUbCExcgp/iLLXFBSsxxECAwEAAaNQME4wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAdBgNVHQ4EFgQUswUzw+7dO/95M0wg0at5/eHo6pgwDQYJKoZIhvcNAQELBQADggEBAG1x0VG6UPF0lLuZgUMCgmLMGh5iHXmqNA2DkHfhbKd+JFUowSA/Vd2NdN7zByNEWCpsNsiEgnzMen9zM53cuA9sQXmG2TxYFUYQ3fuFXpqrRvBqxP0UpeSZG6rZvr/nihoUfIY8JWC/iNIBoUbMjfUay2BDmCzRbLIKrmhuaHpIxHxSnHs1EUYcDejk7pzmdPPazrcKatmn1LK0o5o3kHXdKxoiYDoH9SVqhiQPx7Ge9oa9TebN9NzXHso3GIYd36YtlD12KRBF7wKbSl7X6oK1ka3WLCCdmMf76gU76ZFuEtgWPkzEckfH8fep0UqtLyPbCXkQv9KXhzkNVyx0poA="
+      },
+      "passwordCredential": {
+        "secretText": "Test@123"
+      },
+      "proof": "To_BE_ADD_IN_NEXT_STEP"
+    }
+    ```
 
-  From the `C#` the following options will be enabled.
+### Generateing the proof of possession tokens.
+
+- To enable the provided code in this tutorial to return a valid PoP token, We need to re-configure the below variables as follow:
+
   ![Package Structure](images/GetPoP1.PNG)
+
+- On successful code execution, the below result will be returned:
 
   ![Package Structure](images/GetPoP2.PNG)
 
+- Add the PoP token in the request body (generated from the previous step) under the `proof` section, as follow:
+
   ```json
   {
     "keyCredential": {
@@ -203,16 +190,31 @@ Make sure to change the values to match to your configurations, see below screen
     "passwordCredential": {
       "secretText": "Test@123"
     },
-    "proof": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjczMEQ2OUUwQzVFMDFCOTIyODc3MzU4QTg5NEQ0QjVDQTYwNTNGRDMiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJjdzFwNE1YZ0c1SW9keldLaVUxTFhLWUZQOU0ifQ.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiIyMTI2YjA4Mi0xODBhLTQ1MjUtODMwMC1lYTY0NjU3NjljNDEiLCJleHAiOjE2Mjk2MzY5NDgsIm5iZiI6MTYyOTYzNjM0OCwiaWF0IjoxNjI5NjM2MzQ4fQ.OWfNEq1oHaxKzwipajhMDMNGihJtF8gYTlXqxy85TXrHx2HGrg3y5uJI-H5MZ5rgrXfuUpFpgmuKIjLT0RDhle2TdtgavLXALYRXBTHl8bgo17IkwIAZeP5oW3HeU7kph7i4pSdG31474tL1vKxqLDr6IaeJklzcC0B7BbL1Bybs147er98XACeJ9k74kEPEm7hP0kOEbzJwm5VfCN2A96wpBCsHRD96bdb5il9OOBbX9FFb536VHNfRSau32LjHPPar0oAgmNj4Zs9penDzvB-j5yBPGiMQguWxDL7L07iiUAnU-frbG2mNh_XjjjWLDKgOgP4mx0_FjsCwEATxRg"
+    -------------------------------------------------------------
+                        THIS SECTION
+    -------------------------------------------------------------
+    "proof": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjczMEQ2OUUwQzVFMDFCOTIyODc3MzU4QTg5NEQ0QjVDQTYwNTNGRDMiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJjdzFwNE1YZ0c1SW9keldLaVUxTFhLWUZQOU0ifQ.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiIyMTI2YjA4Mi0xODBhLTQ1MjUtODMwMC1lYTY0NjU3NjljNDEiLCJleHAiOjE2Mjk2MzY5NDgsIm5iZiI6MTYyOTYzNjM0OCwiaWF0IjoxNjI5NjM2MzQ4fQ.OWfNEq1oHaxKzwipajhMDMNGihJtF8gYTlXqxy85TXrHx2HGrg3y5uJI-H5MZ5rgrXfuUpFpgmuKIjLT0RDhle2TdtgavLXALYRXBTHl8bgo17IkwIAZeP5oW3HeU7kph7i4pSdG31474tL1vKxqLDr6IaeJklzcC0B7BbL1Bybs147er98XACeJ9k74kEPEm7hP0kOEbzJwm5VfCN2A96wpBCsHRD96bdb5il9OOBbX9FFb536VHNfRSau32LjHPPar0oAgmNj4Zs9penDzvB-j5yBPGiMQguWxDL7L07iiUAnU-frbG2mNh_XjjjWLDKgOgP4mx0_FjsCwEATxRg" 
+    -------------------------------------------------------------
+                        THIS SECTION
+    -------------------------------------------------------------
   }
   ```
 
-  Now, let's add the PoP token in the request body and the previously generated access token in the header.
+
+### Finally, call the API.
+
+**All the required properties have been added to the request body and a successful `200 OK` response code should be returned.**
+
+- The result of adding a new key credential (certificate) to a servicePrincipal is shown below:
 
   ![Package Structure](images/NewCertUploaded.PNG)
 
-  As shown in the above screen the certificate has been added successfully.
-
-  To check the newly added certificate, we can do a `GET` request for `https://graph.microsoft.com/v1.0/servicePrincipals/2126b082-180a-4525-8300-ea6465769c41`.
+- To show the newly added certificate, we can do a `GET` request to the following Graph API, see below screenshots.
+  
+  ```http
+  https://graph.microsoft.com/v1.0/servicePrincipals/2126b082-180a-4525-8300-ea6465769c41
+  ```
 
   ![Package Structure](images/NewCertUploaded2.PNG)
+
+> **:warning: We can use the [removeKey](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-removekey?view=graph-rest-1.0&tabs=http) API to remove expired/unwanted certificate from a servicePrincipal.**
