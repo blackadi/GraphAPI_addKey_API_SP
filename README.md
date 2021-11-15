@@ -4,7 +4,7 @@ By using this API, we can add a new certficate to any servicePrincipal. The idea
 
 ## Add a certificate to an existing servicePrincipal
 
-> **:danger: ServicePrincipals that don’t have any existing valid certificates (i.e.: no certificates have been added yet, or all certificates have expired), won’t be able to use this service action. [Update servicePrincipal](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update?view=graph-rest-1.0&tabs=http) can be used to perform an update instead.**
+> **:no_entry: ServicePrincipals that don’t have any existing valid certificates (i.e.: no certificates have been added yet, or all certificates have expired), won’t be able to use this service action. [Update servicePrincipal](https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update?view=graph-rest-1.0&tabs=http) can be used to perform an update instead.**
 
 ### Prerequisite
 - Valid certificate. (_For the sake of this example, we will use a self-signed certificate_)
