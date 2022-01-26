@@ -11,9 +11,18 @@ namespace SampleCertCall
         static void Main(string[] args)
         {
             // Configure the following
-            string pfxFilePath = "cert which is uploaded to azure\\uploadedCert.pfx";
+            /**
+            pfxFilePath -> This must be the same valid cert used/uploaded to azure for generating access Token and PoP token  
+            */
+
+            string pfxFilePath = "cert which will be added via API call\\newCertToUpload.pfx";
             string password = "Test@123";
-            string objectId = "2126b082-180a-4525-8300-ea6465769c41"; // use {CLIENT_ID} for creating client_assertion and use {ObjectID} for PoP token creation
+
+            /**
+                - If you want to create client_assertion then add your application {CLIENT_ID} as objectId.
+                - If you want to create PoP (proof of possession) token then add your application {ObjectID} as objectId.
+            **/
+            string objectId = "9d97836c-be4a-4e70-a06d-d33c2467d11e";
             Guid guid = Guid.NewGuid();
 
             // Get signing certificate
