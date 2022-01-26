@@ -17,4 +17,14 @@
 
 - Finally, call the API.
 
-[![MS Graph API - servicePrincipal:addKey](https://img.youtube.com/vi/MOS4L4mMZmc/0.jpg)](https://www.youtube.com/watch?v=MOS4L4mMZmc)
+> [![MS Graph API - servicePrincipal:addKey](https://img.youtube.com/vi/MOS4L4mMZmc/0.jpg)](https://www.youtube.com/watch?v=MOS4L4mMZmc)
+
+## Running the sample
+
+> Clone this repository `git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git`
+
+> Clean the solution, rebuild the solution, and run it. You might want to go into the solution properties and set the right startup project first.
+
+```console
+    dotnet run
+```
