@@ -17,4 +17,4 @@
 
 - Finally, call the API.
 
-[![Everything Is AWESOME](https://i9.ytimg.com/vi/MOS4L4mMZmc/mq2.jpg?sqp=CPTywI8G&rs=AOn4CLCZuC_NA2Y8HxbmU0-3D1-fm-SukA)](https://youtu.be/MOS4L4mMZmc "Everything Is AWESOME")
+[![MS Graph API - servicePrincipal:addKey](images/youtube.jpg)](https://youtu.be/MOS4L4mMZmc "MS Graph API - servicePrincipal:addKey")
