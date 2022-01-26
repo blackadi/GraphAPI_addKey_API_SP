@@ -17,4 +17,4 @@
 
 - Finally, call the API.
 
-[![MS Graph API - servicePrincipal:addKey](images/youtube.jpg)](https://youtu.be/MOS4L4mMZmc "MS Graph API - servicePrincipal:addKey")
+[![MS Graph API - servicePrincipal:addKey](https://img.youtube.com/vi/MOS4L4mMZmc/0.jpg)](https://www.youtube.com/watch?v=MOS4L4mMZmc)
