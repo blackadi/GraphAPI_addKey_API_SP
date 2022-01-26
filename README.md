@@ -21,7 +21,7 @@
 
 ## Running the sample
 
-> Clone this repository `git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git`
+Clone this repository `git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git`
 
 > Clean the solution, rebuild the solution, and run it.
 
