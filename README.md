@@ -23,7 +23,7 @@
 
 > Clone this repository `git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git`
 
-> Clean the solution, rebuild the solution, and run it. You might want to go into the solution properties and set the right startup project first.
+> Clean the solution, rebuild the solution, and run it.
 
 ```console
     dotnet run
