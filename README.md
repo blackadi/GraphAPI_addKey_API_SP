@@ -6,7 +6,7 @@
 
   > Applications that don’t have any existing valid certificates (no certificates have been added yet, or all certificates have expired), won’t be able to use this service action. You can use the Update application operation to perform an update instead.
 
-- Second, generate `accessToken` based on a vaild certificate (For the sake of this demo we will use `newCertToUpload.cer` which is uploaded to azure).
+- Second, generate `accessToken` based on a vaild certificate (For the sake of this demo we will use `uploadedCert.pfx` which is uploaded to azure).
 
   1. Generate `client_assertion` via the C# code.
   1. Generate `access_token`
