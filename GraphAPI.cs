@@ -102,6 +102,7 @@ namespace SampleCertCall
             };
 
             var handler = new JsonWebTokenHandler();
+            // Get Client Assertion
             var client_assertion = handler.CreateToken(securityTokenDescriptor);
             Console.WriteLine("\n\"Generate Client Assertion Token:\"\n--------------------------------------------");
             Console.WriteLine($"client_assertion: {client_assertion}");

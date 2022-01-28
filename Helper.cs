@@ -54,7 +54,7 @@ namespace SampleCertCall
             Console.WriteLine("----------------------------------------------------------------------------");
             Console.WriteLine($"endDateTime: {Convert.ToDateTime(cert.GetExpirationDateString()).ToString("yyyy-MM-ddTHH:mm:ssZ")}");
             Console.WriteLine("----------------------------------------------------------------------------");
-            Console.WriteLine($"keyId: {Guid.NewGuid()}");
+            // Console.WriteLine($"keyId: {Guid.NewGuid()}");
 
             return Convert.ToBase64String(cert.GetRawCertData());
         }

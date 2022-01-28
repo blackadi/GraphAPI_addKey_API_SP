@@ -41,25 +41,25 @@ namespace SampleCertCall
             /**
             * Call the addKey API using Graph SDK
             **/
-            // var graphClient = new GraphSDK();
+            var graphClient = new GraphSDK();
             // var code = graphClient.AddKeyWithPassword_GraphSDK(poP, objectId, key, pwd);
             // if (code == HttpStatusCode.OK)
             // {
-            //     Console.WriteLine("Uploaded!");
+            //     Console.WriteLine("\n\n\nUploaded!");
             // }
             // else
             // {
-            //     Console.WriteLine("Something went wrong!");
+            //     Console.WriteLine("\n\n\nSomething went wrong!");
             // }
-            // var code = graphClient.RemoveKey_GraphSDK(poP, objectId, "0bdee6ff-c762-461c-b114-42781972938a");
-            // if (code == HttpStatusCode.NoContent)
-            // {
-            //     Console.WriteLine("Cert Deleted!");
-            // }
-            // else
-            // {
-            //     Console.WriteLine("Something went wrong!");
-            // }
+            var code = graphClient.RemoveKey_GraphSDK(poP, objectId, "e2719db2-c6ef-470f-8970-3d7457bb99cc");
+            if (code == HttpStatusCode.NoContent)
+            {
+                Console.WriteLine("\n\n\nCert Deleted!");
+            }
+            else
+            {
+                Console.WriteLine("\n\n\nSomething went wrong!");
+            }
 
             /**
             * Call the addKey API directly without using SDK
@@ -68,22 +68,22 @@ namespace SampleCertCall
             // HttpStatusCode code = new GraphAPI().AddKey(poP, objectId, token);
             // if (code == HttpStatusCode.OK)
             // {
-            //     Console.WriteLine("Uploaded!");
+            //     Console.WriteLine("\n\n\nUploaded!");
             // }
             // else
             // {
-            //     Console.WriteLine("Something went wrong!");
+            //     Console.WriteLine("\n\n\nSomething went wrong!");
             // }
 
             /// Add Certificate ID to delete it
-            // HttpStatusCode code = new GraphAPI().RemoveKey(poP, objectId, "5582c95d-6141-4527-94b8-99fd0229e7c4", token);
+            // HttpStatusCode code = new GraphAPI().RemoveKey(poP, objectId, "0c57cadb-c8a3-4676-ab4f-9c23f0a447a7", token);
             // if (code == HttpStatusCode.NoContent)
             // {
-            //     Console.WriteLine("Cert Deleted!");
+            //     Console.WriteLine("\n\n\nCert Deleted!");
             // }
             // else
             // {
-            //     Console.WriteLine("Something went wrong!");
+            //     Console.WriteLine("\n\n\nSomething went wrong!");
             // }
 
         }
