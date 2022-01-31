@@ -65,26 +65,26 @@ namespace SampleCertCall
             * Call the addKey API directly without using SDK
             **/
             /// Upload Certificate
-            HttpStatusCode code = new GraphAPI().AddKey(poP, objectId, token);
-            if (code == HttpStatusCode.OK)
-            {
-                Console.WriteLine("\n\n\nUploaded!");
-            }
-            else
-            {
-                Console.WriteLine("\n\n\nSomething went wrong!");
-            }
-
-            /// Add Certificate ID to delete it
-            // HttpStatusCode code = new GraphAPI().RemoveKey(poP, objectId, "0c57cadb-c8a3-4676-ab4f-9c23f0a447a7", token);
-            // if (code == HttpStatusCode.NoContent)
+            // HttpStatusCode code = new GraphAPI().AddKey(poP, objectId, token);
+            // if (code == HttpStatusCode.OK)
             // {
-            //     Console.WriteLine("\n\n\nCert Deleted!");
+            //     Console.WriteLine("\n\n\nUploaded!");
             // }
             // else
             // {
             //     Console.WriteLine("\n\n\nSomething went wrong!");
             // }
+
+            /// Add Certificate ID to delete it
+            HttpStatusCode code = new GraphAPI().RemoveKey(poP, objectId, "242d73b7-ec7e-43cf-9407-ad2548ba932b", token);
+            if (code == HttpStatusCode.NoContent)
+            {
+                Console.WriteLine("\n\n\nCert Deleted!");
+            }
+            else
+            {
+                Console.WriteLine("\n\n\nSomething went wrong!");
+            }
 
         }
     }

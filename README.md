@@ -19,6 +19,8 @@
 
 - Finally, call the API.
 
+> :warning: The certificates used in this sample are for testing purposes only.
+
 ## Running the sample
 
 Clone this repository `git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git`
