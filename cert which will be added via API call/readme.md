@@ -1,4 +1,6 @@
-# [Option 1: Create and export your public certificate without a private key](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-1--create-and-export-your-public-certificate-without-a-private-key)
+# Instruction for creating a self-signed certificate for testing
+
+## [Option 1: Create and export your public certificate without a private key](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-1--create-and-export-your-public-certificate-without-a-private-key)
 
 Use the certificate you create using this method to authenticate from an application running from your machine. For example, authenticate from Windows PowerShell.
 
@@ -16,7 +18,7 @@ Export-Certificate -Cert $cert -FilePath "C:\Users\admin\Desktop\{certificateNam
 
 Your certificate is now ready to upload to the Azure portal. Once uploaded, retrieve the certificate thumbprint for use to authenticate your application.
 
-# [Option 2: Create and export your public certificate with its private key](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-2-create-and-export-your-public-certificate-with-its-private-key)
+## [Option 2: Create and export your public certificate with its private key](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-2-create-and-export-your-public-certificate-with-its-private-key)
 
 Use this option to create a certificate and its private key if your application will be running from another machine or cloud, such as Azure Automation.
 
@@ -46,7 +48,7 @@ Export-PfxCertificate -Cert $cert -FilePath "C:\Users\admin\Desktop\{privateKeyN
 
 Your certificate (`.cer` file) is now ready to upload to the Azure portal. You also have a private key (`.pfx` file) that is encrypted and can't be read by other parties. Once uploaded, retrieve the certificate thumbprint for use to authenticate your application.
 
-# [Optional task: Delete the certificate from the keystore.](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#optional-task-delete-the-certificate-from-the-keystore)
+## [Optional task: Delete the certificate from the keystore.](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#optional-task-delete-the-certificate-from-the-keystore)
 
 If you created the certificate using Option 2, you can delete the key pair from your personal store. First, run the following command to retrieve the certificate thumbprint.
 
@@ -60,6 +62,6 @@ Then, copy the thumbprint that is displayed and use it to delete the certificate
 Remove-Item -Path Cert:\CurrentUser\My\{pasteTheCertificateThumbprintHere} -DeleteKey
 ```
 
-# [Know your certificate expiry date](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#know-your-certificate-expiry-date)
+## [Know your certificate expiry date](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#know-your-certificate-expiry-date)
 
 The self-signed certificate you created following the steps above has a limited lifetime before it expires. In the **App registrations** section of the Azure portal, the **Certificates & secrets** screen displays the expiration date of the certificate. If you're using Azure Automation, the Certificates screen on the Automation account displays the expiration date of the **certificate**. Follow the previous steps to create a new self-signed certificate.
