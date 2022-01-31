@@ -1,6 +1,8 @@
-# MS Graph API - {application: addKey}
+# A DOTNET Core 3.1 console application sample calling MS Graph API to add a key credential to an application
 
-## For this demo we will use addKey API for `application` instead of service principal for visual effect simplicity using `azure portal` to validate certificate upload.
+## For this demo we will use [addKey API](https://docs.microsoft.com/en-us/graph/api/application-addkey?view=graph-rest-1.0&tabs=http) for `application`, but the code can be changed to use `service principal` instead.
+
+> This sample provides the ability to either call the `addKey` API using _graph SDK_ or _directly calling the graph API_.
 
 - First, upload a valid certificate as it's needed to enable addAPI key.
 
@@ -13,11 +15,9 @@
 
 - Third, generate `proof of possession` token.
 
-- Forth, get the `key` value for the new certificate.
+- Forth, get the `key` value of the new certificate which will be used by the [addKey API](https://docs.microsoft.com/en-us/graph/api/application-addkey?view=graph-rest-1.0&tabs=http) request body.
 
 - Finally, call the API.
-
-> [![MS Graph API - servicePrincipal:addKey](https://img.youtube.com/vi/MOS4L4mMZmc/0.jpg)](https://www.youtube.com/watch?v=MOS4L4mMZmc)
 
 ## Running the sample
 
