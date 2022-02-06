@@ -10,14 +10,13 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
 
 
 namespace SampleCertCall
 {
     class GraphAPI
     {
-        public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken)
+        public HttpStatusCode AddKeyWithPassword(string poP, string objectId, string api, string accessToken)
         {
             var client = new HttpClient();
             var url = $"{api}{objectId}/addKey";
@@ -47,6 +46,43 @@ namespace SampleCertCall
                 {
                     secretText = password,
                 },
+                proof = poP
+            };
+            var stringPayload = JsonConvert.SerializeObject(payload);
+            var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+
+            var res = client.PostAsync(url, httpContent).GetAwaiter().GetResult();
+
+            return res.StatusCode;
+        }
+
+        public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken)
+        {
+            var client = new HttpClient();
+            var url = $"{api}{objectId}/addKey";
+
+            var defaultRequestHeaders = client.DefaultRequestHeaders;
+            if (defaultRequestHeaders.Accept == null || !defaultRequestHeaders.Accept.Any(m => m.MediaType == "application/json"))
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            }
+            defaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            // Get the new certificate info which will be uploaded via the graph API 
+            string pfxFilePath = "cert which will be added via API call\\newCertToUpload.pfx";
+            X509Certificate2 CurrentCertUsed = new X509Certificate2(pfxFilePath);
+            var key = new Helper().GetCertificateKey(CurrentCertUsed);
+
+            string pass = null;
+            var payload = new
+            {
+                keyCredential = new
+                {
+                    type = "X509CertAndPassword",
+                    usage = "Sign",
+                    key,
+                },
+                passwordCredential = pass,
                 proof = poP
             };
             var stringPayload = JsonConvert.SerializeObject(payload);

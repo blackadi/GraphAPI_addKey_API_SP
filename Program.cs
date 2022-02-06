@@ -110,7 +110,7 @@ namespace SampleCertCall
                         break;
                     case 5:
                         // Call the addKey API directly without using SDK
-                        code = new GraphAPI().AddKey(poP, objectId, api, token);
+                        code = new GraphAPI().AddKeyWithPassword(poP, objectId, api, token);
                         if (code == HttpStatusCode.OK)
                         {
                             Console.WriteLine("\n______________________");
