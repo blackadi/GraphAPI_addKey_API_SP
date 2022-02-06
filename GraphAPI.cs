@@ -10,15 +10,18 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
+
 
 namespace SampleCertCall
 {
     class GraphAPI
     {
-        public HttpStatusCode AddKey(string poP, string objectId, string accessToken)
+        public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken)
         {
             var client = new HttpClient();
-            var url = $"https://graph.microsoft.com/v1.0/applications/{objectId}/addKey";
+            var url = $"{api}{objectId}/addKey";
+
             var defaultRequestHeaders = client.DefaultRequestHeaders;
             if (defaultRequestHeaders.Accept == null || !defaultRequestHeaders.Accept.Any(m => m.MediaType == "application/json"))
             {
@@ -54,10 +57,10 @@ namespace SampleCertCall
             return res.StatusCode;
         }
 
-        public HttpStatusCode RemoveKey(string poP, string objectId, string keyId, string accessToken)
+        public HttpStatusCode RemoveKey(string poP, string objectId, string api, string keyId, string accessToken)
         {
             var client = new HttpClient();
-            var url = $"https://graph.microsoft.com/v1.0/applications/{objectId}/removeKey";
+            var url = $"{api}{objectId}/removeKey";
             var defaultRequestHeaders = client.DefaultRequestHeaders;
             if (defaultRequestHeaders.Accept == null || !defaultRequestHeaders.Accept.Any(m => m.MediaType == "application/json"))
             {
@@ -78,7 +81,7 @@ namespace SampleCertCall
             return res.StatusCode;
         }
 
-        public string GenerateTokenviaClientAssertion(string clientId, string aud, X509Certificate2 signingCert, string tenantID)
+        public string GenerateClientAssertion(string aud, string clientId, X509Certificate2 signingCert, string tenantID)
         {
             Guid guid = Guid.NewGuid();
 
@@ -104,9 +107,12 @@ namespace SampleCertCall
             var handler = new JsonWebTokenHandler();
             // Get Client Assertion
             var client_assertion = handler.CreateToken(securityTokenDescriptor);
-            Console.WriteLine("\n\"Generate Client Assertion Token:\"\n--------------------------------------------");
-            Console.WriteLine($"client_assertion: {client_assertion}");
 
+            return client_assertion;
+        }
+
+        public string GenerateAccessTokenWithClientAssertion(string aud, string client_assertion, string clientId, X509Certificate2 signingCert, string tenantID)
+        {
             // GET ACCESS TOKEN
             var data = new[]
             {
