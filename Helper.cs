@@ -63,7 +63,7 @@ namespace SampleCertCall
             Console.WriteLine("__________________________________________________________________________________________\n");
         }
 
-        public GraphServiceClient GetGraphClient(string scopes, string tenantId, string clientId, string clientSecret)
+        public GraphServiceClient GetGraphClient(string scopes, string tenantId, string clientId, X509Certificate2 signingCert)
         {
             // using Azure.Identity;
             var options = new TokenCredentialOptions
@@ -72,8 +72,8 @@ namespace SampleCertCall
             };
 
             // https://docs.microsoft.com/dotnet/api/azure.identity.clientsecretcredential
-            var clientSecretCredential = new ClientSecretCredential(
-                tenantId, clientId, clientSecret, options);
+            var clientSecretCredential = new ClientCertificateCredential(
+                tenantId, clientId, signingCert, options);
 
             var graphClient = new GraphServiceClient(clientSecretCredential, new[] { scopes });
 

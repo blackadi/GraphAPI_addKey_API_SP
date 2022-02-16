@@ -16,7 +16,6 @@ namespace SampleCertCall
             config = new Helper().ReadFromJsonFile();
             var clientId = config.GetValue<string>("ClientId");
             string tenantID = config.GetValue<string>("TenantId");
-            string clientSecret = config.GetValue<string>("ClientSecret");
             string scopes = config.GetValue<string>("Scopes");
             string objectId = config.GetValue<string>("ObjectId");
             string api = config.GetValue<string>("ApiUrl");
@@ -24,9 +23,29 @@ namespace SampleCertCall
             string aud_ClientAssertion = config.GetValue<string>("Aud_ClientAssertion"); // audience for PoP must equal this val
 
             // pfxFilePath -> This must be the same valid cert used/uploaded to azure for generating access Token and PoP token
-            string pfxFilePath = "cert which is uploaded to azure\\uploadedCert.pfx";
-            string password = "Test@123";
-            X509Certificate2 signingCert = new X509Certificate2(pfxFilePath, password);
+            string pfxFilePath = config.GetValue<string>("CertificateDiskPath");
+            bool isCertKeyEnabled = config.GetValue<bool>("EnableCertKey");
+            string password = config.GetValue<string>("CertificatePassword");
+            X509Certificate2 signingCert = null;
+            try
+            {
+                if (isCertKeyEnabled)
+                    signingCert = new X509Certificate2(pfxFilePath, password);
+                else
+                    signingCert = new X509Certificate2(pfxFilePath);
+            }
+            catch (System.Security.Cryptography.CryptographicException ex)
+            {
+                Console.WriteLine("You need to add a correct certificate path and/or password for this sample to work\n" + ex.Message);
+                Environment.Exit(-1);
+            }
+
+
+            if (clientId.Contains("YOUR_CLIENT_ID_HERE") || tenantID.Contains("YOUR_TENANT_ID_HERE") || objectId.Contains("YOUR_OBJECT_ID_HERE") || aud_ClientAssertion.Contains("{YOUR_TENANT_ID_HERE}"))
+            {
+                Console.WriteLine("Please configure the sample to use your Azure AD tenant using appsettings.json file");
+                Environment.Exit(-1);
+            }
 
             //========================
             //Get acessToken via Client Assertion
@@ -44,7 +63,7 @@ namespace SampleCertCall
             string pwd = "Test@123";
             X509Certificate2 CurrentCertUsed = new X509Certificate2(newCerthPath, pwd);
             var key = new Helper().GetCertificateKey(CurrentCertUsed);
-            var graphClient = new Helper().GetGraphClient(scopes, tenantID, clientId, clientSecret);
+            var graphClient = new Helper().GetGraphClient(scopes, tenantID, clientId, signingCert);
 
             int choice = -1;
             while (choice != 0)
@@ -55,11 +74,12 @@ namespace SampleCertCall
                 Console.WriteLine("0. Exit");
                 Console.WriteLine("1. Display access token");
                 Console.WriteLine("2. Display client assertion");
-                Console.WriteLine("3. Display certificate Info");
-                Console.WriteLine("4. Upload certificate using Graph SDK");
-                Console.WriteLine("5. Upload certificate using Graph API");
-                Console.WriteLine("6. Delete certificate using Graph SDK");
-                Console.WriteLine("7. Delete certificate using Graph API");
+                Console.WriteLine("3. Display PoP token");
+                Console.WriteLine("4. Display certificate Info");
+                Console.WriteLine("5. Upload certificate using Graph SDK");
+                Console.WriteLine("6. Upload certificate using Graph API");
+                Console.WriteLine("7. Delete certificate using Graph SDK");
+                Console.WriteLine("8. Delete certificate using Graph API");
                 Console.WriteLine("\nEnter the choose number here:");
                 choice = Int32.TryParse(Console.ReadLine(), out choice) ? choice : -1;
 
@@ -87,10 +107,16 @@ namespace SampleCertCall
                         Console.WriteLine("__________________\n");
                         break;
                     case 3:
+                        // Display client assertion
+                        Console.WriteLine("\n\"Proof of Possession Token Value is\"\n__________________");
+                        Console.WriteLine($"PoP token: {poP}");
+                        Console.WriteLine("__________________\n");
+                        break;
+                    case 4:
                         // Display certificate key
                         new Helper().DisplayCertificateInfo(CurrentCertUsed);
                         break;
-                    case 4:
+                    case 5:
                         // Call the addKey API using Graph SDK
                         code = new GraphSDK().AddKeyWithPassword_GraphSDK(poP, objectId, key, pwd, graphClient);
                         if (code == HttpStatusCode.OK)
@@ -108,7 +134,7 @@ namespace SampleCertCall
                         }
 
                         break;
-                    case 5:
+                    case 6:
                         // Call the addKey API directly without using SDK
                         code = new GraphAPI().AddKeyWithPassword(poP, objectId, api, token);
                         if (code == HttpStatusCode.OK)
@@ -125,7 +151,7 @@ namespace SampleCertCall
                             Console.WriteLine("______________________\n");
                         }
                         break;
-                    case 6:
+                    case 7:
                         // Call the removeKey API using Graph SDK
                         Console.WriteLine("\nEnter certificate ID that you want to delete:");
                         certID = Console.ReadLine();
@@ -154,7 +180,7 @@ namespace SampleCertCall
                         }
 
                         break;
-                    case 7:
+                    case 8:
                         // Call the removeKey API directly without using API
                         Console.WriteLine("\nEnter certificate ID that you want to delete:");
                         certID = Console.ReadLine();
