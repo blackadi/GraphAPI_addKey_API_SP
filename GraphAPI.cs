@@ -112,7 +112,13 @@ namespace SampleCertCall
             var stringPayload = JsonConvert.SerializeObject(payload);
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
 
+
             var res = client.PostAsync(url, httpContent).GetAwaiter().GetResult();
+
+            if (res.Content.ReadAsStringAsync().Result.Contains("No credentials found to be removed"))
+            {
+                throw new HttpRequestException("CertID Not Found", new HttpRequestException(res.Content.ReadAsStringAsync().Result));
+            }
 
             return res.StatusCode;
         }

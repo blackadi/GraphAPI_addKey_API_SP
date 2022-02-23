@@ -2,6 +2,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 using System.Net;
+using System.Net.Http;
 
 namespace SampleCertCall
 {
@@ -14,7 +15,7 @@ namespace SampleCertCall
             // Read app registration info
             //=============================
             config = new Helper().ReadFromJsonFile();
-            var clientId = config.GetValue<string>("ClientId");
+            string clientId = config.GetValue<string>("ClientId");
             string tenantID = config.GetValue<string>("TenantId");
             string scopes = config.GetValue<string>("Scopes");
             string objectId = config.GetValue<string>("ObjectId");
@@ -27,6 +28,7 @@ namespace SampleCertCall
             bool isCertKeyEnabled = config.GetValue<bool>("EnableCertKey");
             string password = config.GetValue<string>("CertificatePassword");
             X509Certificate2 signingCert = null;
+            new Helper().IsConfigSetToDefault(clientId, tenantID, scopes, objectId, aud_ClientAssertion);
             try
             {
                 if (isCertKeyEnabled)
@@ -37,13 +39,6 @@ namespace SampleCertCall
             catch (System.Security.Cryptography.CryptographicException ex)
             {
                 Console.WriteLine("You need to add a correct certificate path and/or password for this sample to work\n" + ex.Message);
-                Environment.Exit(-1);
-            }
-
-
-            if (clientId.Contains("YOUR_CLIENT_ID_HERE") || tenantID.Contains("YOUR_TENANT_ID_HERE") || objectId.Contains("YOUR_OBJECT_ID_HERE") || aud_ClientAssertion.Contains("{YOUR_TENANT_ID_HERE}"))
-            {
-                Console.WriteLine("Please configure the sample to use your Azure AD tenant using appsettings.json file");
                 Environment.Exit(-1);
             }
 
@@ -155,27 +150,39 @@ namespace SampleCertCall
                         // Call the removeKey API using Graph SDK
                         Console.WriteLine("\nEnter certificate ID that you want to delete:");
                         certID = Console.ReadLine();
-                        if (Guid.TryParse(certID, out val))
+                        try
                         {
-                            code = new GraphSDK().RemoveKey_GraphSDK(poP, objectId, certID, graphClient);
-                            if (code == HttpStatusCode.NoContent)
+                            if (Guid.TryParse(certID, out val))
                             {
-                                Console.WriteLine("\n______________________");
-                                Console.WriteLine("Cert Deleted Successfully!");
-                                Console.WriteLine("_____________________\n");
+                                code = new GraphSDK().RemoveKey_GraphSDK(poP, objectId, certID, graphClient);
+
+                                if (code == HttpStatusCode.NoContent)
+                                {
+                                    Console.WriteLine("\n______________________");
+                                    Console.WriteLine("Cert Deleted Successfully!");
+                                    Console.WriteLine("_____________________\n");
+                                }
+                                else
+                                {
+                                    Console.WriteLine("\n______________________");
+                                    Console.WriteLine("Something went wrong!");
+                                    Console.WriteLine("HTTP Status code is " + code);
+                                    Console.WriteLine("______________________\n");
+                                }
                             }
                             else
                             {
                                 Console.WriteLine("\n______________________");
-                                Console.WriteLine("\n\n\nSomething went wrong!");
-                                Console.WriteLine("HTTP Status code is " + code);
+                                Console.WriteLine("Invalid Certificate ID");
                                 Console.WriteLine("______________________\n");
                             }
                         }
-                        else
+
+                        catch (Exception ex)
                         {
+                            Console.WriteLine(ex.Message);
                             Console.WriteLine("\n______________________");
-                            Console.WriteLine("Invalid Certificate ID");
+                            Console.WriteLine("ERROR: CertID Not Found");
                             Console.WriteLine("______________________\n");
                         }
 
@@ -184,30 +191,41 @@ namespace SampleCertCall
                         // Call the removeKey API directly without using API
                         Console.WriteLine("\nEnter certificate ID that you want to delete:");
                         certID = Console.ReadLine();
-                        if (Guid.TryParse(certID, out val))
+                        try
                         {
-                            code = new GraphAPI().RemoveKey(poP, objectId, api, certID, token);
-                            if (code == HttpStatusCode.NoContent)
+                            if (Guid.TryParse(certID, out val))
                             {
-                                Console.WriteLine("\n______________________");
-                                Console.WriteLine("Cert Deleted Successfully!");
-                                Console.WriteLine("______________________\n");
+                                code = new GraphAPI().RemoveKey(poP, objectId, api, certID, token);
+
+                                if (code == HttpStatusCode.NoContent)
+                                {
+                                    Console.WriteLine("\n______________________");
+                                    Console.WriteLine("Cert Deleted Successfully!");
+                                    Console.WriteLine("______________________\n");
+                                }
+                                else
+                                {
+                                    Console.WriteLine("\n______________________");
+                                    Console.WriteLine("Something went wrong!");
+                                    Console.WriteLine("HTTP Status code is " + code);
+                                    Console.WriteLine("______________________\n");
+                                }
                             }
                             else
                             {
                                 Console.WriteLine("\n______________________");
-                                Console.WriteLine("Something went wrong!");
-                                Console.WriteLine("HTTP Status code is " + code);
+                                Console.WriteLine("Invalid Certificate ID");
                                 Console.WriteLine("______________________\n");
                             }
                         }
-                        else
+
+                        catch (HttpRequestException ex)
                         {
+                            Console.WriteLine(ex.InnerException.Message);
                             Console.WriteLine("\n______________________");
-                            Console.WriteLine("Invalid Certificate ID");
+                            Console.WriteLine(ex.Message);
                             Console.WriteLine("______________________\n");
                         }
-
                         break;
                     default:
                         Console.WriteLine("\n______________________");

@@ -71,11 +71,11 @@ namespace SampleCertCall
                 AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
             };
 
-            // https://docs.microsoft.com/dotnet/api/azure.identity.clientsecretcredential
-            var clientSecretCredential = new ClientCertificateCredential(
+            // https://docs.microsoft.com/dotnet/api/azure.identity.clientcertificatecredential
+            var clientCertificateCredential = new ClientCertificateCredential(
                 tenantId, clientId, signingCert, options);
 
-            var graphClient = new GraphServiceClient(clientSecretCredential, new[] { scopes });
+            var graphClient = new GraphServiceClient(clientCertificateCredential, new[] { scopes });
 
             return graphClient;
         }
@@ -90,6 +90,14 @@ namespace SampleCertCall
             configuration = builder.Build();
 
             return configuration;
+        }
+
+        public void IsConfigSetToDefault(string clientId, string tenantID, string scopes, string objectId, string aud_ClientAssertion)
+        {
+            if (clientId.Contains("YOUR_CLIENT_ID_HERE") || tenantID.Contains("YOUR_TENANT_ID_HERE") || objectId.Contains("YOUR_OBJECT_ID_HERE") || aud_ClientAssertion.Contains("{YOUR_TENANT_ID_HERE}"))
+            {
+                Console.WriteLine("Please configure the sample to use your Azure AD tenant using appsettings.json file");
+            }
         }
     }
 }

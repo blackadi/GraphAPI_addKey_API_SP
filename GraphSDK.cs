@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Http;
 using Microsoft.Graph;
 
 
@@ -53,12 +54,19 @@ namespace SampleCertCall
         {
             var keyId = Guid.Parse(certID);
 
-            var res = graphClient.Applications[objectId]
-                .RemoveKey(keyId, proof)
-                .Request()
-                .PostResponseAsync().GetAwaiter().GetResult();
+            try
+            {
+                var res = graphClient.Applications[objectId]
+                    .RemoveKey(keyId, proof)
+                    .Request()
+                    .PostResponseAsync().GetAwaiter().GetResult();
 
-            return res.StatusCode;
+                return res.StatusCode;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
