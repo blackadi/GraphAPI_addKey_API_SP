@@ -214,7 +214,7 @@ namespace SampleCertCall
                             else
                             {
                                 Console.WriteLine("\n______________________");
-                                Console.WriteLine("Invalid Certificate ID");
+                                Console.WriteLine("ERROR: Invalid Certificate ID");
                                 Console.WriteLine("______________________\n");
                             }
                         }
