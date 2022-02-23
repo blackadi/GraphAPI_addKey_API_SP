@@ -3,6 +3,7 @@
 ## For this demo we will use [addKey API](https://docs.microsoft.com/en-us/graph/api/application-addkey?view=graph-rest-1.0&tabs=http) for `application`, but the code can be changed to use `service principal` instead.
 
 > This sample provides the ability to either call the `addKey` API using _graph SDK_ or _directly calling the graph API_.
+> [More info here](https://github.com/blackadi/GraphAPI_addKey_API_SP/wiki)
 
 ## Running the sample
 
