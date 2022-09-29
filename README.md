@@ -63,10 +63,12 @@ Open the project in your IDE (like Visual Studio) to configure the code.
 1. Find the app key `TenantId` and replace the existing value with the directory (tenant) ID value you recorded earlier from the Azure portal.
 1. Find the app key `ObjectId` and replace the existing value with your app registration (Object ID) value which can be found from the Azure portal.
 1. Find the app key `Aud_ClientAssertion` and replace `{YOUR_TENANT_ID_HERE}` with the directory (tenant) ID value you recorded earlier from the Azure portal.
-1. Find the app key `CertificateDiskPath` and replace the existing value with your self-signed certificate, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
-1. Find the app key `CertificatePassword` and replace the existing value with your self-signed certificate password, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
+1. Find the app key `CertificateDiskPath` and replace the existing value with your exising self-signed certificate, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
+1. Find the app key `CertificatePassword` and replace the existing value with your exising self-signed certificate password, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
+1. Find the app key `NewCertificateDiskPath` and replace the existing value with your new self-signed certificate, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
+1. Find the app key `NewCertificatePassword` and replace the existing value with your new self-signed certificate password, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
 
-> If you want to use a certificate without a private key just find the app key `EnableCertKey` and set it to false.
+--If you want to use a certificate without a private key just find the app key `EnableCertKey` and set it to false--
 
 ### Step 5: Run the sample
 
