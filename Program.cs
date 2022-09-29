@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http;
+using Microsoft.IdentityModel.Tokens;
 
 namespace SampleCertCall
 {
@@ -25,20 +26,37 @@ namespace SampleCertCall
 
             // pfxFilePath -> This must be the same valid cert used/uploaded to azure for generating access Token and PoP token
             string pfxFilePath = config.GetValue<string>("CertificateDiskPath");
-            bool isCertKeyEnabled = config.GetValue<bool>("EnableCertKey");
             string password = config.GetValue<string>("CertificatePassword");
             X509Certificate2 signingCert = null;
             new Helper().IsConfigSetToDefault(clientId, tenantID, scopes, objectId, aud_ClientAssertion);
             try
             {
-                if (isCertKeyEnabled)
+                if (!password.IsNullOrEmpty())
                     signingCert = new X509Certificate2(pfxFilePath, password);
                 else
                     signingCert = new X509Certificate2(pfxFilePath);
             }
             catch (System.Security.Cryptography.CryptographicException ex)
             {
-                Console.WriteLine("You need to add a correct certificate path and/or password for this sample to work\n" + ex.Message);
+                Console.WriteLine("Check the old/uploaded certificate {CertificateDiskPath}, you need to add a correct certificate path and/or password for this sample to work\n" + ex.Message);
+                Environment.Exit(-1);
+            }
+
+            // newCerFilePath -> This is the new cert which will be uploaded
+            string newCerFilePath = config.GetValue<string>("NewCertificateDiskPath");
+            string newCertPassword = config.GetValue<string>("NewCertificatePassword");
+            X509Certificate2 newCert = null;
+            new Helper().IsConfigSetToDefault(clientId, tenantID, scopes, objectId, aud_ClientAssertion);
+            try
+            {
+                if (newCertPassword != "")
+                    newCert = new X509Certificate2(newCerFilePath, newCertPassword);
+                else
+                    newCert = new X509Certificate2(newCerFilePath);
+            }
+            catch (System.Security.Cryptography.CryptographicException ex)
+            {
+                Console.WriteLine("Check the new certificate {NewCertificateDiskPath}, you need to add a correct certificate path and/or password for this sample to work\n" + ex.Message);
                 Environment.Exit(-1);
             }
 
@@ -54,10 +72,7 @@ namespace SampleCertCall
             var poP = new Helper().GeneratePoPToken(objectId, aud_POP, signingCert);
 
             // Get the new certificate info which will be uploaded via the graph API 
-            string newCerthPath = "cert which will be added via API call\\newCertToUpload.pfx";
-            string pwd = "Test@123";
-            X509Certificate2 CurrentCertUsed = new X509Certificate2(newCerthPath, pwd);
-            var key = new Helper().GetCertificateKey(CurrentCertUsed);
+            var key = new Helper().GetCertificateKey(newCert);
             var graphClient = new Helper().GetGraphClient(scopes, tenantID, clientId, signingCert);
 
             int choice = -1;
@@ -109,11 +124,18 @@ namespace SampleCertCall
                         break;
                     case 4:
                         // Display certificate key
-                        new Helper().DisplayCertificateInfo(CurrentCertUsed);
+                        new Helper().DisplayCertificateInfo(newCert);
                         break;
                     case 5:
-                        // Call the addKey API using Graph SDK
-                        code = new GraphSDK().AddKeyWithPassword_GraphSDK(poP, objectId, key, pwd, graphClient);
+                        // Call the addKey SDK using Graph SDK
+                        if (newCertPassword != "")
+                        {
+                            code = new GraphSDK().AddKeyWithPassword_GraphSDK(poP, objectId, key, newCertPassword, graphClient);
+                        }
+                        else
+                        {
+                            code = new GraphSDK().AddKey_GraphSDK(poP, objectId, key, graphClient);
+                        }
                         if (code == HttpStatusCode.OK)
                         {
                             Console.WriteLine("\n______________________");
@@ -131,7 +153,14 @@ namespace SampleCertCall
                         break;
                     case 6:
                         // Call the addKey API directly without using SDK
-                        code = new GraphAPI().AddKeyWithPassword(poP, objectId, api, token);
+                        if (!password.IsNullOrEmpty())
+                        {
+                            code = new GraphAPI().AddKeyWithPassword(poP, objectId, api, token);
+                        }
+                        else
+                        {
+                            code = new GraphAPI().AddKey(poP, objectId, api, token, newCert);
+                        }
                         if (code == HttpStatusCode.OK)
                         {
                             Console.WriteLine("\n______________________");

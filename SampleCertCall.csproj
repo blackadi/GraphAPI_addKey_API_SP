@@ -25,6 +25,9 @@
     <None Update="cert which will be added via API call\newCertToUpload.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="cert which will be added via API call\newCertWithoutPass.cer">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

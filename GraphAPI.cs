@@ -56,7 +56,7 @@ namespace SampleCertCall
             return res.StatusCode;
         }
 
-        public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken)
+        public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken, X509Certificate2 CurrentCertUsed)
         {
             var client = new HttpClient();
             var url = $"{api}{objectId}/addKey";
@@ -68,9 +68,6 @@ namespace SampleCertCall
             }
             defaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            // Get the new certificate info which will be uploaded via the graph API 
-            string pfxFilePath = "cert which will be added via API call\\newCertToUpload.pfx";
-            X509Certificate2 CurrentCertUsed = new X509Certificate2(pfxFilePath);
             var key = new Helper().GetCertificateKey(CurrentCertUsed);
 
             string pass = null;
@@ -78,8 +75,8 @@ namespace SampleCertCall
             {
                 keyCredential = new
                 {
-                    type = "X509CertAndPassword",
-                    usage = "Sign",
+                    type = "AsymmetricX509Cert",
+                    usage = "Verify",
                     key,
                 },
                 passwordCredential = pass,
