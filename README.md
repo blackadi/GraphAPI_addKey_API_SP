@@ -68,7 +68,7 @@ Open the project in your IDE (like Visual Studio) to configure the code.
 1. Find the app key `NewCertificateDiskPath` and replace the existing value with your new self-signed certificate, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
 1. Find the app key `NewCertificatePassword` and replace the existing value with your new self-signed certificate password, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
 
---If you want to use a certificate without a private key just find the app key `EnableCertKey` and set it to false--
+<del>If you want to use a certificate without a private key just find the app key `EnableCertKey` and set it to false.<del>
 
 ### Step 5: Run the sample
 
