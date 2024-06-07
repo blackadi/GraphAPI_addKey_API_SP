@@ -10,12 +10,14 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 
 namespace SampleCertCall
 {
     class GraphAPI
     {
+        private static IConfiguration config;
         public HttpStatusCode AddKeyWithPassword(string poP, string objectId, string api, string accessToken)
         {
             var client = new HttpClient();
@@ -29,8 +31,9 @@ namespace SampleCertCall
             defaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             // Get the new certificate info which will be uploaded via the graph API 
-            string pfxFilePath = "cert which will be added via API call\\newCertToUpload.pfx";
-            string password = "Test@123";
+            config = new Helper().ReadFromJsonFile();
+            string pfxFilePath = config.GetValue<string>("NewCertificateDiskPath");
+            string password = config.GetValue<string>("NewCertificatePassword");
             X509Certificate2 CurrentCertUsed = new X509Certificate2(pfxFilePath, password);
             var key = new Helper().GetCertificateKey(CurrentCertUsed);
 
