@@ -23,13 +23,12 @@ git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git
    - In the **Supported account types** section, select **Accounts in this organizational directory only ({tenant name})**.
    - Click **Register** button at the bottom to create the application.
 1. On the application **Overview** page, find the **Application (client) ID** and **Directory (tenant) ID** values and record it for later. You'll need it to configure the configuration file(s) later in your code.
-1. From the **Certificates & secrets** page, in the **Client secrets** section, choose **New client secret**:
+1. From the **Certificates & secrets** page, in the **Certificates** section, choose **Upload certificate**:
 
-   - Type a key description (for instance `app secret`),
-   - Select a key duration, for example **6 months**.
-   - When you press the **Add** button, the key value will be displayed, copy, and save the value in a safe location.
-   - You'll need this key later to configure the project in Visual Studio. This key value will not be displayed again, nor retrievable by any other means,
-     so record it as soon as it is visible from the Azure portal.
+   - Select the certificate file you want to upload. It must be one of the following file types: _.cer, .pem, .crt_.
+   
+      >**_Please be advised that this certificate will be utilized for authentication purposes with Microsoft Entra ID in place of client secrets_**.
+   - Select **Add**.
 
 1. In the Application menu blade, click on the **API permissions** in the left to open the page where we add access to the Apis that your application needs.
 
@@ -48,7 +47,7 @@ git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git
 
 - You can follow the instruction [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-2-create-and-export-your-public-certificate-with-its-private-key), upload a valid certificate as it's needed when calling addKey API.
 
-> Applications that don’t have any existing valid certificates (no certificates have been added yet, or all certificates have expired), won’t be able to use this service action. You can use the Update application operation to perform an update instead.
+   > Applications without any existing valid certificates (either no certificates have been added or all certificates have expired) will not be able to utilize this code sample. Instead, you can use the Update application operation via the Graph API to modify the `keyCredentials` property, or you can upload your valid certificates through the Azure portal as detailed [here](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app#add-a-certificate).
 
 Finally, go back to the Azure portal. In the Application menu blade, click on the **Certificates & secrets**, in the **Certificates** section, upload the certificate you created.
 
@@ -67,8 +66,6 @@ Open the project in your IDE (like Visual Studio) to configure the code.
 1. Find the app key `CertificatePassword` and replace the existing value with your exising self-signed certificate password, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
 1. Find the app key `NewCertificateDiskPath` and replace the existing value with your new self-signed certificate, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
 1. Find the app key `NewCertificatePassword` and replace the existing value with your new self-signed certificate password, for more info see [this](https://github.com/blackadi/GraphAPI_addKey_API_SP/blob/main/cert%20which%20is%20uploaded%20to%20azure/readme.md).
-
-<del>If you want to use a certificate without a private key just find the app key `EnableCertKey` and set it to false.<del>
 
 ### Step 5: Run the sample
 
