@@ -47,7 +47,7 @@ git clone https://github.com/blackadi/GraphAPI_addKey_API_SP.git
 
 - You can follow the instruction [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate#option-2-create-and-export-your-public-certificate-with-its-private-key), upload a valid certificate as it's needed when calling addKey API.
 
-   > Applications without any existing valid certificates (either no certificates have been added or all certificates have expired) will not be able to utilize this code sample. Instead, you can use the Update application operation via the Graph API to modify the `keyCredentials` property, or you can upload your valid certificates through the Azure portal as detailed [here](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app#add-a-certificate).
+   > Applications without any existing valid certificates (either no certificates have been added or all certificates have expired) will not be able to utilize this code sample. Instead, you can use the Update application operation via the [Graph API](https://learn.microsoft.com/en-us/graph/api/application-update?view=graph-rest-1.0&tabs=http) to modify the `keyCredentials` property, or you can upload your valid certificates through the Azure portal as detailed [here](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app#add-a-certificate).
 
 Finally, go back to the Azure portal. In the Application menu blade, click on the **Certificates & secrets**, in the **Certificates** section, upload the certificate you created.
 
