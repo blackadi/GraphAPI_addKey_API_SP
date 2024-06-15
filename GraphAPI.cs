@@ -19,7 +19,7 @@ namespace SampleCertCall
         public HttpStatusCode AddKeyWithPassword(string poP, string objectId, string api, string accessToken, string key, string password)
         {
             var client = new HttpClient();
-            var url = $"{api}{objectId}/addKey";
+            var url = $"{api}/{objectId}/addKey";
 
             var defaultRequestHeaders = client.DefaultRequestHeaders;
             if (defaultRequestHeaders.Accept == null || !defaultRequestHeaders.Accept.Any(m => m.MediaType == "application/json"))
@@ -53,7 +53,7 @@ namespace SampleCertCall
         public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken, string key)
         {
             var client = new HttpClient();
-            var url = $"{api}{objectId}/addKey";
+            var url = $"{api}/{objectId}/addKey";
 
             var defaultRequestHeaders = client.DefaultRequestHeaders;
             if (defaultRequestHeaders.Accept == null || !defaultRequestHeaders.Accept.Any(m => m.MediaType == "application/json"))
@@ -85,7 +85,7 @@ namespace SampleCertCall
         public HttpStatusCode RemoveKey(string poP, string objectId, string api, string keyId, string accessToken)
         {
             var client = new HttpClient();
-            var url = $"{api}{objectId}/removeKey";
+            var url = $"{api}/{objectId}/removeKey";
             var defaultRequestHeaders = client.DefaultRequestHeaders;
             if (defaultRequestHeaders.Accept == null || !defaultRequestHeaders.Accept.Any(m => m.MediaType == "application/json"))
             {
