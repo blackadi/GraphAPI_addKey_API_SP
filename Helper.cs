@@ -5,13 +5,70 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.Graph;
 using Azure.Identity;
-using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
+using System.Net.Http;
 
 namespace SampleCertCall
 {
     class Helper
     {
-        private static IConfiguration configuration;
+        public string GenerateClientAssertion(string aud, string clientId, X509Certificate2 signingCert, string tenantID)
+        {
+            Guid guid = Guid.NewGuid();
+
+            // aud and iss are the only required claims.
+            var claims = new Dictionary<string, object>()
+            {
+                { "aud", aud },
+                { "iss", clientId },
+                { "sub", clientId },
+                { "jti", guid}
+            };
+
+            // token validity should not be more than 10 minutes
+            var now = DateTime.UtcNow;
+            var securityTokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            {
+                Claims = claims,
+                NotBefore = now,
+                Expires = now.AddMinutes(10),
+                SigningCredentials = new X509SigningCredentials(signingCert)
+            };
+
+            var handler = new JsonWebTokenHandler();
+            // Get Client Assertion
+            var client_assertion = handler.CreateToken(securityTokenDescriptor);
+
+            return client_assertion;
+        }
+
+        public string GenerateAccessTokenWithClientAssertion(string aud, string client_assertion, string clientId, X509Certificate2 signingCert, string tenantID)
+        {
+            // GET ACCESS TOKEN
+            var data = new[]
+            {
+                new KeyValuePair<string, string>("client_id", clientId),
+                new KeyValuePair<string, string>("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
+                new KeyValuePair<string, string>("client_assertion", client_assertion),
+                new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                new KeyValuePair<string, string>("scope", "https://graph.microsoft.com/.default"),
+            };
+
+            var client = new HttpClient();
+            var url = $"https://login.microsoftonline.com/{tenantID}/oauth2/v2.0/token";
+            var res = client.PostAsync(url, new FormUrlEncodedContent(data)).GetAwaiter().GetResult();
+            var token = "";
+            using (HttpResponseMessage response = res)
+            {
+                response.EnsureSuccessStatusCode();
+                string responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                JObject obj = JObject.Parse(responseBody);
+                token = (string)obj["access_token"];
+            }
+
+            return token;
+        }
+
         public string GeneratePoPToken(string objectId, string aud, X509Certificate2 signingCert)
         {
             Guid guid = Guid.NewGuid();
@@ -66,7 +123,7 @@ namespace SampleCertCall
         public GraphServiceClient GetGraphClient(string scopes, string tenantId, string clientId, X509Certificate2 signingCert)
         {
             // using Azure.Identity;
-            var options = new TokenCredentialOptions
+            var options = new ClientCertificateCredentialOptions
             {
                 AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
             };
@@ -80,24 +137,5 @@ namespace SampleCertCall
             return graphClient;
         }
 
-        public IConfiguration ReadFromJsonFile()
-        {
-            // Using appsettings.json to load the configuration settings
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(System.IO.Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-
-            configuration = builder.Build();
-
-            return configuration;
-        }
-
-        public void IsConfigSetToDefault(string clientId, string tenantID, string scopes, string objectId, string aud_ClientAssertion)
-        {
-            if (clientId.Contains("YOUR_CLIENT_ID_HERE") || tenantID.Contains("YOUR_TENANT_ID_HERE") || objectId.Contains("YOUR_OBJECT_ID_HERE") || aud_ClientAssertion.Contains("{YOUR_TENANT_ID_HERE}"))
-            {
-                Console.WriteLine("Please configure the sample to use your Azure AD tenant using appsettings.json file");
-            }
-        }
     }
 }

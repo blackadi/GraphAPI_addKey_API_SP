@@ -10,15 +10,13 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
 
 
 namespace SampleCertCall
 {
     class GraphAPI
     {
-        private static IConfiguration config;
-        public HttpStatusCode AddKeyWithPassword(string poP, string objectId, string api, string accessToken)
+        public HttpStatusCode AddKeyWithPassword(string poP, string objectId, string api, string accessToken, string key, string password)
         {
             var client = new HttpClient();
             var url = $"{api}{objectId}/addKey";
@@ -29,13 +27,6 @@ namespace SampleCertCall
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             }
             defaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            // Get the new certificate info which will be uploaded via the graph API 
-            config = new Helper().ReadFromJsonFile();
-            string pfxFilePath = config.GetValue<string>("NewCertificateDiskPath");
-            string password = config.GetValue<string>("NewCertificatePassword");
-            X509Certificate2 CurrentCertUsed = new X509Certificate2(pfxFilePath, password);
-            var key = new Helper().GetCertificateKey(CurrentCertUsed);
 
             var payload = new
             {
@@ -59,7 +50,7 @@ namespace SampleCertCall
             return res.StatusCode;
         }
 
-        public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken, X509Certificate2 CurrentCertUsed)
+        public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken, string key)
         {
             var client = new HttpClient();
             var url = $"{api}{objectId}/addKey";
@@ -70,8 +61,6 @@ namespace SampleCertCall
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             }
             defaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var key = new Helper().GetCertificateKey(CurrentCertUsed);
 
             string pass = null;
             var payload = new
@@ -121,63 +110,6 @@ namespace SampleCertCall
             }
 
             return res.StatusCode;
-        }
-
-        public string GenerateClientAssertion(string aud, string clientId, X509Certificate2 signingCert, string tenantID)
-        {
-            Guid guid = Guid.NewGuid();
-
-            // aud and iss are the only required claims.
-            var claims = new Dictionary<string, object>()
-            {
-                { "aud", aud },
-                { "iss", clientId },
-                { "sub", clientId },
-                { "jti", guid}
-            };
-
-            // token validity should not be more than 10 minutes
-            var now = DateTime.UtcNow;
-            var securityTokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
-            {
-                Claims = claims,
-                NotBefore = now,
-                Expires = now.AddMinutes(10),
-                SigningCredentials = new X509SigningCredentials(signingCert)
-            };
-
-            var handler = new JsonWebTokenHandler();
-            // Get Client Assertion
-            var client_assertion = handler.CreateToken(securityTokenDescriptor);
-
-            return client_assertion;
-        }
-
-        public string GenerateAccessTokenWithClientAssertion(string aud, string client_assertion, string clientId, X509Certificate2 signingCert, string tenantID)
-        {
-            // GET ACCESS TOKEN
-            var data = new[]
-            {
-                new KeyValuePair<string, string>("client_id", clientId),
-                new KeyValuePair<string, string>("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
-                new KeyValuePair<string, string>("client_assertion", client_assertion),
-                new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                new KeyValuePair<string, string>("scope", "https://graph.microsoft.com/.default"),
-            };
-
-            var client = new HttpClient();
-            var url = $"https://login.microsoftonline.com/{tenantID}/oauth2/v2.0/token";
-            var res = client.PostAsync(url, new FormUrlEncodedContent(data)).GetAwaiter().GetResult();
-            var token = "";
-            using (HttpResponseMessage response = res)
-            {
-                response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                JObject obj = JObject.Parse(responseBody);
-                token = (string)obj["access_token"];
-            }
-
-            return token;
         }
     }
 }

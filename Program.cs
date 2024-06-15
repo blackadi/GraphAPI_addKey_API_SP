@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Graph.Models.ExternalConnectors;
 
 namespace SampleCertCall
 {
@@ -13,9 +14,13 @@ namespace SampleCertCall
         static void Main(string[] args)
         {
             //=============================
-            // Read app registration info
+            // Global variables which will be used to store app registation info, you can use appsettings.json to store such data
             //=============================
-            config = new Helper().ReadFromJsonFile();
+            var builder = new ConfigurationBuilder()
+               .SetBasePath(System.IO.Directory.GetCurrentDirectory())
+               .AddJsonFile("appsettings.json");
+
+            config = builder.Build();
             string clientId = config.GetValue<string>("ClientId");
             string tenantID = config.GetValue<string>("TenantId");
             string scopes = config.GetValue<string>("Scopes");
@@ -24,11 +29,10 @@ namespace SampleCertCall
             string aud_POP = config.GetValue<string>("Aud_POP"); // audience for Client Assertion must equal this val
             string aud_ClientAssertion = config.GetValue<string>("Aud_ClientAssertion"); // audience for PoP must equal this val
 
-            // pfxFilePath -> This must be the same valid cert used/uploaded to azure for generating access Token and PoP token
-            string pfxFilePath = config.GetValue<string>("CertificateDiskPath");
-            string password = config.GetValue<string>("CertificatePassword");
+            // pfxFilePath -> Use an existing valid cert used/uploaded to the app or service principal to generate access token and PoP token.
+            string pfxFilePath = config.GetValue<string>("CertificateDiskPath"); // Replace the file path with the location of your certificate.
+            string password = config.GetValue<string>("CertificatePassword"); // If applicable, replace the password value with your certificate password.
             X509Certificate2 signingCert = null;
-            new Helper().IsConfigSetToDefault(clientId, tenantID, scopes, objectId, aud_ClientAssertion);
             try
             {
                 if (!password.IsNullOrEmpty())
@@ -42,11 +46,10 @@ namespace SampleCertCall
                 Environment.Exit(-1);
             }
 
-            // newCerFilePath -> This is the new cert which will be uploaded
-            string newCerFilePath = config.GetValue<string>("NewCertificateDiskPath");
-            string newCertPassword = config.GetValue<string>("NewCertificatePassword");
+            // newCerFilePath -> This is the new cert which will be uploaded. The cert can also be stored in Azure Key Vault.
+            string newCerFilePath = config.GetValue<string>("NewCertificateDiskPath"); // Replace the file path with the location of your new certificate to be uploaded using the Graph API.
+            string newCertPassword = config.GetValue<string>("NewCertificatePassword"); // If applicable, replace the password value with your new certificate password.
             X509Certificate2 newCert = null;
-            new Helper().IsConfigSetToDefault(clientId, tenantID, scopes, objectId, aud_ClientAssertion);
             try
             {
                 if (newCertPassword != "")
@@ -61,17 +64,17 @@ namespace SampleCertCall
             }
 
             //========================
-            //Get acessToken via Client Assertion
+            //Get acessToken via client assertion
             //========================
-            var client_assertion = new GraphAPI().GenerateClientAssertion(aud_ClientAssertion, clientId, signingCert, tenantID);
-            var token = new GraphAPI().GenerateAccessTokenWithClientAssertion(aud_ClientAssertion, client_assertion, clientId, signingCert, tenantID);
+            var client_assertion = new Helper().GenerateClientAssertion(aud_ClientAssertion, clientId, signingCert, tenantID);
+            var token = new Helper().GenerateAccessTokenWithClientAssertion(aud_ClientAssertion, client_assertion, clientId, signingCert, tenantID);
 
             //========================
             //Get PoP Token
             //========================
             var poP = new Helper().GeneratePoPToken(objectId, aud_POP, signingCert);
 
-            // Get the new certificate info which will be uploaded via the graph API 
+            // Get the new certificate info which will be uploaded via Microsoft Graph API call
             var key = new Helper().GetCertificateKey(newCert);
             var graphClient = new Helper().GetGraphClient(scopes, tenantID, clientId, signingCert);
 
@@ -130,13 +133,13 @@ namespace SampleCertCall
                         // Call the addKey SDK using Graph SDK
                         if (newCertPassword != "")
                         {
-                            code = new GraphSDK().AddKeyWithPassword_GraphSDK(poP, objectId, key, newCertPassword, graphClient);
+                            var response = new GraphSDK().AddKeyWithPassword_GraphSDKAsync(poP, objectId, key, newCertPassword, graphClient).GetAwaiter().GetResult();
                         }
                         else
                         {
-                            code = new GraphSDK().AddKey_GraphSDK(poP, objectId, key, graphClient);
+                            var response = new GraphSDK().AddKey_GraphSDKAsync(poP, objectId, key, graphClient).GetAwaiter().GetResult();
                         }
-                        if (code == HttpStatusCode.OK)
+                        if (code != null)
                         {
                             Console.WriteLine("\n______________________");
                             Console.WriteLine("Uploaded Successfully!");
@@ -155,11 +158,11 @@ namespace SampleCertCall
                         // Call the addKey API directly without using SDK
                         if (!password.IsNullOrEmpty())
                         {
-                            code = new GraphAPI().AddKeyWithPassword(poP, objectId, api, token);
+                            code = new GraphAPI().AddKeyWithPassword(poP, objectId, api, token, key, newCertPassword);
                         }
                         else
                         {
-                            code = new GraphAPI().AddKey(poP, objectId, api, token, newCert);
+                            code = new GraphAPI().AddKey(poP, objectId, api, token, key);
                         }
                         if (code == HttpStatusCode.OK)
                         {
@@ -183,9 +186,9 @@ namespace SampleCertCall
                         {
                             if (Guid.TryParse(certID, out val))
                             {
-                                code = new GraphSDK().RemoveKey_GraphSDK(poP, objectId, certID, graphClient);
+                                var response = new GraphSDK().RemoveKey_GraphSDKAsync(poP, objectId, certID, graphClient).GetAwaiter().GetResult();
 
-                                if (code == HttpStatusCode.NoContent)
+                                if (response)
                                 {
                                     Console.WriteLine("\n______________________");
                                     Console.WriteLine("Cert Deleted Successfully!");

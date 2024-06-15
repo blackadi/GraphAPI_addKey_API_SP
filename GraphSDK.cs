@@ -1,7 +1,11 @@
 using System;
-using System.Net;
-using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Graph;
+using Microsoft.Graph.Models;
+// using Microsoft.Graph.ServicePrincipals.Item.AddKey; // Dependencies for the AddKey service principal method
+// using Microsoft.Graph.ServicePrincipals.Item.RemoveKey; // Dependencies for the RemoveKey service principal method
+using Microsoft.Graph.Applications.Item.AddKey;
+using Microsoft.Graph.Applications.Item.RemoveKey;
 
 
 namespace SampleCertCall
@@ -9,59 +13,69 @@ namespace SampleCertCall
     class GraphSDK
     {
         // Using GraphSDK instead of calling the API directly
-        public HttpStatusCode AddKey_GraphSDK(string proof, string objectId, string key, GraphServiceClient graphClient)
+        public async Task<KeyCredential> AddKey_GraphSDKAsync(string proof, string objectId, string key, GraphServiceClient graphClient)
         {
-            var keyCredential = new KeyCredential
+            var requestBody = new AddKeyPostRequestBody
             {
-                Type = "AsymmetricX509Cert",
-                Usage = "Verify",
-                Key = Convert.FromBase64String(key)
+                KeyCredential = new KeyCredential
+                {
+                    Type = "AsymmetricX509Cert",
+                    Usage = "Verify",
+                    Key = Convert.FromBase64String(key)
+                },
+                PasswordCredential = null,
+                Proof = proof
             };
 
-            PasswordCredential passwordCredential = null;
+            // var res = await graphClient.ServicePrincipals[objectId].AddKey.PostAsync(requestBody); // Uncomment this to upload a certificate to a service principal and the using statement at the top
+            var res = await graphClient.Applications[objectId].AddKey.PostAsync(requestBody);
 
-            var res = graphClient.Applications[objectId]
-                .AddKey(keyCredential, proof, passwordCredential)
-                .Request()
-                .PostResponseAsync().GetAwaiter().GetResult();
-
-            return res.StatusCode;
+            return res;
         }
 
-        public HttpStatusCode AddKeyWithPassword_GraphSDK(string proof, string objectId, string key, string password, GraphServiceClient graphClient)
+        public async Task<KeyCredential> AddKeyWithPassword_GraphSDKAsync(string proof, string objectId, string key, string password, GraphServiceClient graphClient)
         {
-            var keyCredential = new KeyCredential
+            var requestBody = new AddKeyPostRequestBody
             {
-                Type = "X509CertAndPassword",
-                Usage = "Sign",
-                Key = Convert.FromBase64String(key)
+                KeyCredential = new KeyCredential
+                {
+                    Type = "X509CertAndPassword",
+                    Usage = "Sign",
+                    Key = Convert.FromBase64String(key)
+                },
+                PasswordCredential = new PasswordCredential
+                {
+                    SecretText = password
+                },
+                Proof = proof
             };
 
-            var passwordCredential = new PasswordCredential
-            {
-                SecretText = password
-            };
+            // var res = await graphClient.ServicePrincipals[objectId] // Uncomment this to upload a certificate to a service principal and the using statement at the top
+            var res = await graphClient.Applications[objectId] // Upload a certificate to the application
+                        .AddKey
+                        .PostAsync(requestBody);
 
-            var res = graphClient.Applications[objectId]
-                        .AddKey(keyCredential, proof, passwordCredential)
-                        .Request()
-                        .PostResponseAsync().GetAwaiter().GetResult();
-
-            return res.StatusCode;
+            return res;
         }
 
-        public HttpStatusCode RemoveKey_GraphSDK(string proof, string objectId, string certID, GraphServiceClient graphClient)
+        public async Task<bool> RemoveKey_GraphSDKAsync(string proof, string objectId, string certID, GraphServiceClient graphClient)
         {
             var keyId = Guid.Parse(certID);
 
             try
             {
-                var res = graphClient.Applications[objectId]
-                    .RemoveKey(keyId, proof)
-                    .Request()
-                    .PostResponseAsync().GetAwaiter().GetResult();
+                var requestBody = new RemoveKeyPostRequestBody
+                {
+                    KeyId = keyId,
+                    Proof = proof
+                };
 
-                return res.StatusCode;
+                // await graphClient.ServicePrincipals[objectId] // Uncomment this to remove a certificate from a service principal and the using statement at the top
+                await graphClient.Applications[objectId] // Remove a certificate from the application
+                    .RemoveKey
+                    .PostAsync(requestBody);
+
+                return true;
             }
             catch (Exception ex)
             {
