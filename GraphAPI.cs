@@ -1,22 +1,16 @@
-using System;
-using System.Net;
-using System.Text;
-using System.Net.Http.Headers;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.JsonWebTokens;
-using System.Net.Http;
-using Newtonsoft.Json.Linq;
-using System.Linq;
 using Newtonsoft.Json;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 
 
 namespace SampleCertCall
 {
     class GraphAPI
     {
-        public HttpStatusCode AddKeyWithPassword(string poP, string objectId, string api, string accessToken, string key, string password)
+        public static HttpStatusCode AddKeyWithPassword(string poP, string objectId, string api, string accessToken, string key, string password)
         {
             var client = new HttpClient();
             var url = $"{api}/{objectId}/addKey";
@@ -45,12 +39,12 @@ namespace SampleCertCall
             var stringPayload = JsonConvert.SerializeObject(payload);
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
 
-            var res = client.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            var res = client.PostAsync(url, httpContent).Result;
 
             return res.StatusCode;
         }
 
-        public HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken, string key)
+        public static HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken, string key)
         {
             var client = new HttpClient();
             var url = $"{api}/{objectId}/addKey";
@@ -77,12 +71,12 @@ namespace SampleCertCall
             var stringPayload = JsonConvert.SerializeObject(payload);
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
 
-            var res = client.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            var res = client.PostAsync(url, httpContent).Result;
 
             return res.StatusCode;
         }
 
-        public HttpStatusCode RemoveKey(string poP, string objectId, string api, string keyId, string accessToken)
+        public static HttpStatusCode RemoveKey(string poP, string objectId, string api, string keyId, string accessToken)
         {
             var client = new HttpClient();
             var url = $"{api}/{objectId}/removeKey";
@@ -102,11 +96,17 @@ namespace SampleCertCall
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
 
 
-            var res = client.PostAsync(url, httpContent).GetAwaiter().GetResult();
+            var res = client.PostAsync(url, httpContent).Result;
+            var contents = res.Content.ReadAsStringAsync().Result;
 
             if (res.Content.ReadAsStringAsync().Result.Contains("No credentials found to be removed"))
             {
-                throw new HttpRequestException("CertID Not Found", new HttpRequestException(res.Content.ReadAsStringAsync().Result));
+                throw new HttpRequestException("CertID Not Found", new HttpRequestException(contents, null, res.StatusCode));
+            }
+
+            if (res.Content.ReadAsStringAsync().Result.Contains("Access Token missing or malformed"))
+            {
+                throw new HttpRequestException("proof-of-possession (PoP) token is invalid", new HttpRequestException(contents, null, res.StatusCode));
             }
 
             return res.StatusCode;

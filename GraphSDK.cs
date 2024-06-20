@@ -1,11 +1,11 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.Graph;
-using Microsoft.Graph.Models;
 // using Microsoft.Graph.ServicePrincipals.Item.AddKey; // Dependencies for the AddKey service principal method
 // using Microsoft.Graph.ServicePrincipals.Item.RemoveKey; // Dependencies for the RemoveKey service principal method
 using Microsoft.Graph.Applications.Item.AddKey;
 using Microsoft.Graph.Applications.Item.RemoveKey;
+using Microsoft.Graph.Models;
+using System;
+using System.Threading.Tasks;
 
 
 namespace SampleCertCall
@@ -13,7 +13,7 @@ namespace SampleCertCall
     class GraphSDK
     {
         // Using GraphSDK instead of calling the API directly
-        public async Task<KeyCredential> AddKey_GraphSDKAsync(string proof, string objectId, string key, GraphServiceClient graphClient)
+        public static async Task<KeyCredential> AddKey_GraphSDKAsync(string proof, string objectId, string key, GraphServiceClient graphClient)
         {
             var requestBody = new AddKeyPostRequestBody
             {
@@ -33,7 +33,7 @@ namespace SampleCertCall
             return res;
         }
 
-        public async Task<KeyCredential> AddKeyWithPassword_GraphSDKAsync(string proof, string objectId, string key, string password, GraphServiceClient graphClient)
+        public static async Task<KeyCredential> AddKeyWithPassword_GraphSDKAsync(string proof, string objectId, string key, string password, GraphServiceClient graphClient)
         {
             var requestBody = new AddKeyPostRequestBody
             {
@@ -58,7 +58,7 @@ namespace SampleCertCall
             return res;
         }
 
-        public async Task<bool> RemoveKey_GraphSDKAsync(string proof, string objectId, string certID, GraphServiceClient graphClient)
+        public static async Task<bool> RemoveKey_GraphSDKAsync(string proof, string objectId, string certID, GraphServiceClient graphClient)
         {
             var keyId = Guid.Parse(certID);
 
@@ -79,7 +79,9 @@ namespace SampleCertCall
             }
             catch (Exception ex)
             {
-                throw ex;
+                Console.Write($"Exception RemoveKey_GraphSDKAsync: {Environment.NewLine}{ex.Message}{Environment.NewLine}{ex.StackTrace}");
+
+                return false;
             }
         }
     }

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Security.Cryptography.X509Certificates;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Graph.Models;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Net;
 using System.Net.Http;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Graph.Models.ExternalConnectors;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SampleCertCall
 {
@@ -66,17 +66,17 @@ namespace SampleCertCall
             //========================
             //Get acessToken via client assertion
             //========================
-            var client_assertion = new Helper().GenerateClientAssertion(aud_ClientAssertion, clientId, signingCert, tenantID);
-            var token = new Helper().GenerateAccessTokenWithClientAssertion(aud_ClientAssertion, client_assertion, clientId, signingCert, tenantID);
+            var client_assertion = Helper.GenerateClientAssertion(aud_ClientAssertion, clientId, signingCert, tenantID);
+            var token = Helper.GenerateAccessTokenWithClientAssertion(aud_ClientAssertion, client_assertion, clientId, signingCert, tenantID);
 
             //========================
             //Get PoP Token
             //========================
-            var poP = new Helper().GeneratePoPToken(objectId, aud_POP, signingCert);
+            var poP = Helper.GeneratePoPToken(objectId, aud_POP, signingCert);
 
             // Get the new certificate info which will be uploaded via Microsoft Graph API call
-            var key = new Helper().GetCertificateKey(newCert);
-            var graphClient = new Helper().GetGraphClient(scopes, tenantID, clientId, signingCert);
+            var key = Helper.GetCertificateKey(newCert);
+            var graphClient = Helper.GetGraphClient(scopes, tenantID, clientId, signingCert);
 
             int choice = -1;
             while (choice != 0)
@@ -97,6 +97,7 @@ namespace SampleCertCall
                 choice = Int32.TryParse(Console.ReadLine(), out choice) ? choice : -1;
 
                 var code = new HttpStatusCode();
+                var response = new KeyCredential();
                 string certID;
                 Guid val;
 
@@ -127,19 +128,19 @@ namespace SampleCertCall
                         break;
                     case 4:
                         // Display certificate key
-                        new Helper().DisplayCertificateInfo(newCert);
+                        Helper.DisplayCertificateInfo(newCert);
                         break;
                     case 5:
                         // Call the addKey SDK using Graph SDK
                         if (newCertPassword != "")
                         {
-                            var response = new GraphSDK().AddKeyWithPassword_GraphSDKAsync(poP, objectId, key, newCertPassword, graphClient).GetAwaiter().GetResult();
+                            response = GraphSDK.AddKeyWithPassword_GraphSDKAsync(poP, objectId, key, newCertPassword, graphClient).GetAwaiter().GetResult();
                         }
                         else
                         {
-                            var response = new GraphSDK().AddKey_GraphSDKAsync(poP, objectId, key, graphClient).GetAwaiter().GetResult();
+                            response = GraphSDK.AddKey_GraphSDKAsync(poP, objectId, key, graphClient).GetAwaiter().GetResult();
                         }
-                        if (code != null)
+                        if (response != null)
                         {
                             Console.WriteLine("\n______________________");
                             Console.WriteLine("Uploaded Successfully!");
@@ -158,11 +159,11 @@ namespace SampleCertCall
                         // Call the addKey API directly without using SDK
                         if (!password.IsNullOrEmpty())
                         {
-                            code = new GraphAPI().AddKeyWithPassword(poP, objectId, api, token, key, newCertPassword);
+                            code = GraphAPI.AddKeyWithPassword(poP, objectId, api, token, key, newCertPassword);
                         }
                         else
                         {
-                            code = new GraphAPI().AddKey(poP, objectId, api, token, key);
+                            code = GraphAPI.AddKey(poP, objectId, api, token, key);
                         }
                         if (code == HttpStatusCode.OK)
                         {
@@ -182,41 +183,32 @@ namespace SampleCertCall
                         // Call the removeKey API using Graph SDK
                         Console.WriteLine("\nEnter certificate ID that you want to delete:");
                         certID = Console.ReadLine();
-                        try
-                        {
-                            if (Guid.TryParse(certID, out val))
-                            {
-                                var response = new GraphSDK().RemoveKey_GraphSDKAsync(poP, objectId, certID, graphClient).GetAwaiter().GetResult();
 
-                                if (response)
-                                {
-                                    Console.WriteLine("\n______________________");
-                                    Console.WriteLine("Cert Deleted Successfully!");
-                                    Console.WriteLine("_____________________\n");
-                                }
-                                else
-                                {
-                                    Console.WriteLine("\n______________________");
-                                    Console.WriteLine("Something went wrong!");
-                                    Console.WriteLine("HTTP Status code is " + code);
-                                    Console.WriteLine("______________________\n");
-                                }
+                        if (Guid.TryParse(certID, out val))
+                        {
+                            var res = GraphSDK.RemoveKey_GraphSDKAsync(poP, objectId, certID, graphClient).GetAwaiter().GetResult();
+
+                            if (res)
+                            {
+                                Console.WriteLine("\n______________________");
+                                Console.WriteLine("Cert Deleted Successfully!");
+                                Console.WriteLine("_____________________\n");
                             }
                             else
                             {
                                 Console.WriteLine("\n______________________");
-                                Console.WriteLine("Invalid Certificate ID");
+                                Console.WriteLine("Something Went Wrong!");
+                                Console.WriteLine("ERROR: Unable to delete certificate");
                                 Console.WriteLine("______________________\n");
                             }
                         }
-
-                        catch (Exception ex)
+                        else
                         {
-                            Console.WriteLine(ex.Message);
                             Console.WriteLine("\n______________________");
-                            Console.WriteLine("ERROR: CertID Not Found");
+                            Console.WriteLine("ERROR: Invalid Certificate ID");
                             Console.WriteLine("______________________\n");
                         }
+
 
                         break;
                     case 8:
@@ -227,7 +219,7 @@ namespace SampleCertCall
                         {
                             if (Guid.TryParse(certID, out val))
                             {
-                                code = new GraphAPI().RemoveKey(poP, objectId, api, certID, token);
+                                code = GraphAPI.RemoveKey(poP, objectId, api, certID, token);
 
                                 if (code == HttpStatusCode.NoContent)
                                 {
@@ -245,9 +237,9 @@ namespace SampleCertCall
                             }
                             else
                             {
-                                Console.WriteLine("\n______________________");
+                                Console.WriteLine("\n------------------------------");
                                 Console.WriteLine("ERROR: Invalid Certificate ID");
-                                Console.WriteLine("______________________\n");
+                                Console.WriteLine("______________________________\n");
                             }
                         }
 
@@ -255,7 +247,7 @@ namespace SampleCertCall
                         {
                             Console.WriteLine(ex.InnerException.Message);
                             Console.WriteLine("\n______________________");
-                            Console.WriteLine(ex.Message);
+                            Console.WriteLine("ERROR: " + ex.Message);
                             Console.WriteLine("______________________\n");
                         }
                         break;

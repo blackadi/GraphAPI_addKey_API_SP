@@ -1,18 +1,18 @@
+using Azure.Identity;
+using Microsoft.Graph;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.Graph;
-using Azure.Identity;
-using Newtonsoft.Json.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SampleCertCall
 {
     class Helper
     {
-        public string GenerateClientAssertion(string aud, string clientId, X509Certificate2 signingCert, string tenantID)
+        public static string GenerateClientAssertion(string aud, string clientId, X509Certificate2 signingCert, string tenantID)
         {
             Guid guid = Guid.NewGuid();
 
@@ -42,7 +42,7 @@ namespace SampleCertCall
             return client_assertion;
         }
 
-        public string GenerateAccessTokenWithClientAssertion(string aud, string client_assertion, string clientId, X509Certificate2 signingCert, string tenantID)
+        public static string GenerateAccessTokenWithClientAssertion(string aud, string client_assertion, string clientId, X509Certificate2 signingCert, string tenantID)
         {
             // GET ACCESS TOKEN
             var data = new[]
@@ -69,7 +69,7 @@ namespace SampleCertCall
             return token;
         }
 
-        public string GeneratePoPToken(string objectId, string aud, X509Certificate2 signingCert)
+        public static string GeneratePoPToken(string objectId, string aud, X509Certificate2 signingCert)
         {
             Guid guid = Guid.NewGuid();
 
@@ -98,12 +98,12 @@ namespace SampleCertCall
             return poP;
         }
 
-        public string GetCertificateKey(X509Certificate2 cert)
+        public static string GetCertificateKey(X509Certificate2 cert)
         {
             return Convert.ToBase64String(cert.GetRawCertData());
         }
 
-        public void DisplayCertificateInfo(X509Certificate2 cert)
+        public static void DisplayCertificateInfo(X509Certificate2 cert)
         {
 
             Console.WriteLine("\n[Certificate info which will be used in the request body {keyCredential resource type}]");
@@ -120,7 +120,7 @@ namespace SampleCertCall
             Console.WriteLine("__________________________________________________________________________________________\n");
         }
 
-        public GraphServiceClient GetGraphClient(string scopes, string tenantId, string clientId, X509Certificate2 signingCert)
+        public static GraphServiceClient GetGraphClient(string scopes, string tenantId, string clientId, X509Certificate2 signingCert)
         {
             // using Azure.Identity;
             var options = new ClientCertificateCredentialOptions
