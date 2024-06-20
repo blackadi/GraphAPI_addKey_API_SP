@@ -12,7 +12,7 @@ namespace SampleCertCall
 {
     class Helper
     {
-        public static string GenerateClientAssertion(string aud, string clientId, X509Certificate2 signingCert, string tenantID)
+        public static string GenerateClientAssertion(string aud, string clientId, X509Certificate2 signingCert)
         {
             Guid guid = Guid.NewGuid();
 
@@ -27,7 +27,7 @@ namespace SampleCertCall
 
             // token validity should not be more than 10 minutes
             var now = DateTime.UtcNow;
-            var securityTokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            var securityTokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = claims,
                 NotBefore = now,
@@ -42,7 +42,7 @@ namespace SampleCertCall
             return client_assertion;
         }
 
-        public static string GenerateAccessTokenWithClientAssertion(string aud, string client_assertion, string clientId, X509Certificate2 signingCert, string tenantID)
+        public static string GenerateAccessTokenWithClientAssertion(string client_assertion, string clientId, string tenantID)
         {
             // GET ACCESS TOKEN
             var data = new[]
@@ -82,7 +82,7 @@ namespace SampleCertCall
 
             // token validity should not be more than 10 minutes
             var now = DateTime.UtcNow;
-            var securityTokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            var securityTokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = claims,
                 NotBefore = now,
@@ -132,7 +132,7 @@ namespace SampleCertCall
             var clientCertificateCredential = new ClientCertificateCredential(
                 tenantId, clientId, signingCert, options);
 
-            var graphClient = new GraphServiceClient(clientCertificateCredential, new[] { scopes });
+            var graphClient = new GraphServiceClient(clientCertificateCredential, [scopes]);
 
             return graphClient;
         }

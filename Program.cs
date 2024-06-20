@@ -66,8 +66,8 @@ namespace SampleCertCall
             //========================
             //Get acessToken via client assertion
             //========================
-            var client_assertion = Helper.GenerateClientAssertion(aud_ClientAssertion, clientId, signingCert, tenantID);
-            var token = Helper.GenerateAccessTokenWithClientAssertion(aud_ClientAssertion, client_assertion, clientId, signingCert, tenantID);
+            var client_assertion = Helper.GenerateClientAssertion(aud_ClientAssertion, clientId, signingCert);
+            var token = Helper.GenerateAccessTokenWithClientAssertion(client_assertion, clientId, tenantID);
 
             //========================
             //Get PoP Token
@@ -96,8 +96,8 @@ namespace SampleCertCall
                 Console.WriteLine("\nEnter the choose number here:");
                 choice = Int32.TryParse(Console.ReadLine(), out choice) ? choice : -1;
 
-                var code = new HttpStatusCode();
-                var response = new KeyCredential();
+                HttpStatusCode code;
+                KeyCredential response;
                 string certID;
                 Guid val;
 
@@ -150,7 +150,6 @@ namespace SampleCertCall
                         {
                             Console.WriteLine("\n______________________");
                             Console.WriteLine("Something went wrong!");
-                            Console.WriteLine("HTTP Status code is " + code);
                             Console.WriteLine("______________________\n");
                         }
 
@@ -208,8 +207,6 @@ namespace SampleCertCall
                             Console.WriteLine("ERROR: Invalid Certificate ID");
                             Console.WriteLine("______________________\n");
                         }
-
-
                         break;
                     case 8:
                         // Call the removeKey API directly without using API
