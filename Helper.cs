@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace SampleCertCall
 {
@@ -42,7 +43,7 @@ namespace SampleCertCall
             return client_assertion;
         }
 
-        public static string GenerateAccessTokenWithClientAssertion(string client_assertion, string clientId, string tenantID)
+        public static async Task<string> GenerateAccessTokenWithClientAssertionAsync(string client_assertion, string clientId, string tenantID)
         {
             // GET ACCESS TOKEN
             var data = new[]
@@ -56,12 +57,18 @@ namespace SampleCertCall
 
             var client = new HttpClient();
             var url = $"https://login.microsoftonline.com/{tenantID}/oauth2/v2.0/token";
-            var res = client.PostAsync(url, new FormUrlEncodedContent(data)).GetAwaiter().GetResult();
+            var res = await client.PostAsync(url, new FormUrlEncodedContent(data));
+            var content = await res.Content.ReadAsStringAsync();
             var token = "";
+
+            if (content.Contains("AADSTS"))
+            {
+                throw new HttpRequestException(content, null, System.Net.HttpStatusCode.Unauthorized);
+            }
             using (HttpResponseMessage response = res)
             {
                 response.EnsureSuccessStatusCode();
-                string responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                string responseBody = await response.Content.ReadAsStringAsync();
                 JObject obj = JObject.Parse(responseBody);
                 token = (string)obj["access_token"];
             }

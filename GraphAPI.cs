@@ -4,13 +4,14 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 
 
 namespace SampleCertCall
 {
     class GraphAPI
     {
-        public static HttpStatusCode AddKeyWithPassword(string poP, string objectId, string api, string accessToken, string key, string password)
+        public static async Task<HttpStatusCode> AddKeyWithPassword(string poP, string objectId, string api, string accessToken, string key, string password)
         {
             var client = new HttpClient();
             var url = $"{api}/{objectId}/addKey";
@@ -39,12 +40,12 @@ namespace SampleCertCall
             var stringPayload = JsonConvert.SerializeObject(payload);
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
 
-            var res = client.PostAsync(url, httpContent).Result;
+            var res = await client.PostAsync(url, httpContent);
 
             return res.StatusCode;
         }
 
-        public static HttpStatusCode AddKey(string poP, string objectId, string api, string accessToken, string key)
+        public static async Task<HttpStatusCode> AddKey(string poP, string objectId, string api, string accessToken, string key)
         {
             var client = new HttpClient();
             var url = $"{api}/{objectId}/addKey";
@@ -71,12 +72,12 @@ namespace SampleCertCall
             var stringPayload = JsonConvert.SerializeObject(payload);
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
 
-            var res = client.PostAsync(url, httpContent).Result;
+            var res = await client.PostAsync(url, httpContent);
 
             return res.StatusCode;
         }
 
-        public static HttpStatusCode RemoveKey(string poP, string objectId, string api, string keyId, string accessToken)
+        public static async Task<HttpStatusCode> RemoveKeyAsync(string poP, string objectId, string api, string keyId, string accessToken)
         {
             var client = new HttpClient();
             var url = $"{api}/{objectId}/removeKey";
@@ -96,8 +97,8 @@ namespace SampleCertCall
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
 
 
-            var res = client.PostAsync(url, httpContent).Result;
-            var contents = res.Content.ReadAsStringAsync().Result;
+            var res = await client.PostAsync(url, httpContent);
+            var contents = await res.Content.ReadAsStringAsync();
 
             if (res.Content.ReadAsStringAsync().Result.Contains("No credentials found to be removed"))
             {

@@ -5,13 +5,14 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace SampleCertCall
 {
     class Program
     {
         private static IConfiguration config;
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             //=============================
             // Global variables which will be used to store app registation info, you can use appsettings.json to store such data
@@ -42,7 +43,7 @@ namespace SampleCertCall
             }
             catch (System.Security.Cryptography.CryptographicException ex)
             {
-                Console.WriteLine("Check the old/uploaded certificate {CertificateDiskPath}, you need to add a correct certificate path and/or password for this sample to work\n" + ex.Message);
+                Console.WriteLine("Check the old/uploaded certificate {CertificateDiskPath}, you need to add a correct certificate path and/or password for this sample to work.\n" + ex.Message);
                 Environment.Exit(-1);
             }
 
@@ -59,7 +60,7 @@ namespace SampleCertCall
             }
             catch (System.Security.Cryptography.CryptographicException ex)
             {
-                Console.WriteLine("Check the new certificate {NewCertificateDiskPath}, you need to add a correct certificate path and/or password for this sample to work\n" + ex.Message);
+                Console.WriteLine("Check the new certificate {NewCertificateDiskPath}, you need to add a correct certificate path and/or password for this sample to work.\n" + ex.Message);
                 Environment.Exit(-1);
             }
 
@@ -67,7 +68,17 @@ namespace SampleCertCall
             //Get acessToken via client assertion
             //========================
             var client_assertion = Helper.GenerateClientAssertion(aud_ClientAssertion, clientId, signingCert);
-            var token = Helper.GenerateAccessTokenWithClientAssertion(client_assertion, clientId, tenantID);
+            var token = "";
+            try
+            {
+                token = await Helper.GenerateAccessTokenWithClientAssertionAsync(client_assertion, clientId, tenantID);
+
+            }
+            catch(HttpRequestException ex)
+            {
+                Console.WriteLine($"Make sure you have the same client certificate on the target app or service principal.\n{ex.Message}");
+                Environment.Exit(-1);
+            }
 
             //========================
             //Get PoP Token
@@ -158,11 +169,11 @@ namespace SampleCertCall
                         // Call the addKey API directly without using SDK
                         if (!password.IsNullOrEmpty())
                         {
-                            code = GraphAPI.AddKeyWithPassword(poP, objectId, api, token, key, newCertPassword);
+                            code = await GraphAPI.AddKeyWithPassword(poP, objectId, api, token, key, newCertPassword);
                         }
                         else
                         {
-                            code = GraphAPI.AddKey(poP, objectId, api, token, key);
+                            code =await  GraphAPI.AddKey(poP, objectId, api, token, key);
                         }
                         if (code == HttpStatusCode.OK)
                         {
@@ -216,7 +227,7 @@ namespace SampleCertCall
                         {
                             if (Guid.TryParse(certID, out val))
                             {
-                                code = GraphAPI.RemoveKey(poP, objectId, api, certID, token);
+                                code = await GraphAPI.RemoveKeyAsync(poP, objectId, api, certID, token);
 
                                 if (code == HttpStatusCode.NoContent)
                                 {
